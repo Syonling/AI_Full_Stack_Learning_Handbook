@@ -2,7 +2,9 @@
 
 > 本章目标：写出你的第一个 API，掌握路由、路径参数、查询参数、请求体四大核心概念。
 > 预计学习时间：3~4 小时。
-
+::: details 关联教程
+[1小时精通Python的FastAPI框架的所有知识点](https://www.bilibili.com/video/BV18F4m1K7N3)
+:::
 ---
 
 ## 学习目标

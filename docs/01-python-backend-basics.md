@@ -2,10 +2,10 @@
 
 > 本章目标：掌握写 FastAPI 后端之前必须会的 Python 基础工具和语法。
 > 预计学习时间：2~3 小时（边看边敲代码）。
-<details>
-<summary>关联教程</summary>
+::: details 关联教程
 [Kaggle-Python](https://www.kaggle.com/learn/python)
-</details>
+:::
+
 ---
 
 ## 学习目标
