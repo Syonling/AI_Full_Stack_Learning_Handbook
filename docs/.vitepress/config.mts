@@ -106,6 +106,6 @@ export default defineConfig({
     },
 
     // 上传 GitHub 后，把下面的链接换成你的仓库地址即可在导航栏显示 GitHub 图标
-    // socialLinks: [{ icon: 'github', link: 'https://github.com/<你的用户名>/<仓库名>' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/Syonling/AI_Full_Stack_Learning_Handbook' }],
   },
 })
