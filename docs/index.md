@@ -28,6 +28,7 @@ features:
     details: 140+ 条速查卡片，覆盖 Python / FastAPI / SQLite / Git / 日志 / 部署 / AI Agent，支持中英文关键词搜索、代码一键复制。
     link: /handbook.html
     linkText: 打开 Code Search
+    target: _blank
   - icon: 🛠
     title: 动手实践
     details: 配套可运行的 Todo CRUD API（demo/ 目录），带日志、异常兜底、.env 配置等"生产四件套"，与教程逐行对应。

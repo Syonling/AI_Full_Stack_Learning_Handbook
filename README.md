@@ -10,7 +10,7 @@
 
 | 场景 | 用什么 | 怎么用 |
 |---|---|---|
-| 📖 **系统学习** | 在线网站 或 [docs/](docs/) 十二章文档 | 按下面的路线顺序阅读，每章末尾有小练习 |
+| 📖 **系统学习** | [在线教程](https://syonling.github.io/AI_Full_Stack_Learning_Handbook/) 或 [docs/](docs/) 十二章文档 | 按下面的路线顺序阅读，每章末尾有小练习 |
 | 🔍 **日常速查** | 网站导航栏 **Code Search**（即 [handbook.html](handbook.html)，本地也可双击打开） | 搜索关键词（中英文都行），代码一键复制 |
 | 🛠 **动手实践** | [demo/](demo/) 可运行项目 | 按 [demo/README.md](demo/README.md) 的步骤跑起来，边学边改 |
 
