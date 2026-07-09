@@ -119,6 +119,6 @@ npm run docs:preview   # 本地预览构建结果
 3. 之后每次 `git push`，[.github/workflows/deploy.yml](.github/workflows/deploy.yml) 自动构建并部署
 
 
-## 📄 License
+## License
 
 CC BY-NC 4.0 (Non-Commercial Use)
