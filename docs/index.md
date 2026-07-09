@@ -69,6 +69,9 @@ features:
 | 15 | [JavaScript 基础](/15-javascript-basics) | 变量函数、数组对象、DOM、事件（Python 对照讲解） | 3~4 小时 |
 | 16 | [JS 网络与联调](/16-js-network-and-integration) | fetch、async/await、给 Todo API 写完整前端 ★ | 4~5 小时 |
 | 17 | [Vue 3 入门](/17-vue-basics) | 响应式、指令、用 Vue 重写 Todo 页面 | 4~5 小时 |
+| 18 | [前端工程组织](/18-frontend-engineering) | 文件夹分层、CSS 设计令牌、BEM 命名、JS 模块化（含 Vue 项目对照） | 3~4 小时 |
+| 19 | [设计美学：Apple 风格](/19-apple-design) | HIG 三原则、8pt 留白、字阶、毛玻璃、Apple 风换肤实战 | 3~4 小时 |
+| 20 | [后端代码组织](/20-backend-engineering) | 分层思想、包结构、循环导入、service 层拆分时机（属「工程化落地」组，学完 10 章即可读） | 3~4 小时 |
 
 > 🎨 **前端章节（13~17）无需按总编号顺序等待**——HTML/CSS 没有任何前置依赖，可与后端章节并行学习；
 > 16 章需要后端 demo 能跑起来（07 章），17 章需要先完成 16 章。
