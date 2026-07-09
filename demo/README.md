@@ -14,6 +14,12 @@ FastAPI + SQLite 的完整 CRUD 示例（CRUD 部分与 [docs/07 章](../docs/07
 | .env.example | 配置模板（复制为 .env 使用；.env 不进 Git） | 08 |
 | requirements.txt | 依赖清单（sqlite3 是 Python 标准库，无需安装） | — |
 | todos.db | 运行后自动生成的数据库文件 | — |
+| [frontend/](frontend/) | 原生 JS 前端页面（结构/样式/行为三文件分离） | 13~16 |
+
+## 前端页面（frontend/）
+
+后端启动后，**直接双击打开 `frontend/index.html`** 即可使用：添加待办、勾选完成、删除，
+全部实时同步到 SQLite（能跨域直接打开是因为后端配了 CORS）。代码与 [docs/16 章](../docs/16-js-network-and-integration.md) 逐块对应。
 
 ## 第一次运行（完整步骤）
 

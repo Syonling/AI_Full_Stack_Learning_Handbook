@@ -171,6 +171,9 @@ const CATS = {
   test:    "测试",
   errors:  "常见错误",
   agent:   "AI Agent 开发",
+  html:    "HTML",
+  css:     "CSS",
+  js:      "JavaScript",
 };
 
 /* 每条 = { cat, title, desc, code, tip?, kw(额外搜索词) } */
@@ -1666,6 +1669,436 @@ for _ in range(10):   # 而不是 while True
 
 # 并行工具调用报错 → 所有 tool_result 必须
 # 放在同一条 user 消息里，不能拆开`},
+
+/* ── HTML ─────────────────────────────── */
+{cat:"html", title:"HTML 文档骨架", kw:"doctype head body meta 模板 骨架 结构",
+ desc:"每个页面的起点。VSCode 输入 ! 按 Tab 自动生成。",
+ code:`<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">              <!-- 没有它中文乱码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面标题</title>
+</head>
+<body>
+    <h1>内容写在 body 里</h1>
+</body>
+</html>`},
+
+{cat:"html", title:"常用文本标签", kw:"h1 p ul ol li strong 标题 段落 列表",
+ desc:"标题 h1~h6（一页只用一个 h1）、段落、有序/无序列表。",
+ code:`<h1>一级标题</h1>
+<p>段落。<strong>加粗</strong>，<em>斜体</em>。</p>
+<ul>
+    <li>无序项（圆点）</li>
+</ul>
+<ol>
+    <li>有序项（编号）</li>
+</ol>`},
+
+{cat:"html", title:"链接与图片", kw:"a href img src alt target 超链接",
+ desc:"a 的 href 是目的地；img 的 alt 是加载失败/读屏时的描述。",
+ code:`<a href="https://example.com" target="_blank">新标签页打开</a>
+<a href="./about.html">站内相对路径</a>
+
+<img src="cat.png" alt="一只橘猫">
+<!-- 路径相对的是 HTML 文件的位置 -->`},
+
+{cat:"html", title:"语义化标签", kw:"header nav main section footer article 语义 div汤",
+ desc:"结构自带含义：SEO 更好、读屏可用、代码可读。纯分组才用 div。",
+ code:`<header>网站标题</header>
+<nav>菜单</nav>
+<main>
+    <article>
+        <h2>文章标题</h2>
+        <p>正文...</p>
+    </article>
+</main>
+<footer>版权信息</footer>`},
+
+{cat:"html", title:"表单基础", kw:"form input button label 提交 输入框",
+ desc:"label 的 for 对应 input 的 id：点文字也能聚焦输入框。",
+ code:`<form id="signup">
+    <label for="username">用户名</label>
+    <input type="text" id="username" name="username"
+           placeholder="请输入" required>
+    <button type="submit">提交</button>
+</form>`,
+ tip:"form 里的按钮默认 type=submit 会刷新页面；JS 接管时写 type=\"button\" 或 preventDefault。"},
+
+{cat:"html", title:"input 常用类型", kw:"type text password email number checkbox radio date",
+ desc:"换 type 浏览器自动换键盘（手机）、自动做基础校验。",
+ code:`<input type="text">      文本
+<input type="password">  密码（圆点显示）
+<input type="email">     邮箱（自带格式校验）
+<input type="number">    数字
+<input type="date">      日期选择器
+<input type="checkbox">  复选框
+<input type="radio">     单选（同 name 一组互斥）
+<input type="file">      文件上传`,
+ tip:"浏览器校验只是体验层，后端 Pydantic 校验永远不能省——前后端都要做。"},
+
+{cat:"html", title:"下拉框与多行文本", kw:"select option textarea 选择",
+ desc:"select 下拉选择；textarea 多行输入。",
+ code:`<select name="level">
+    <option value="beginner">新手</option>
+    <option value="pro" selected>高手</option>
+</select>
+
+<textarea name="bio" rows="4" placeholder="多行文本"></textarea>`},
+
+{cat:"html", title:"id 与 class 的区别", kw:"属性 全局 唯一 门牌号",
+ desc:"id 全页唯一（JS 定位用）；class 可复用可叠加（CSS 样式用）。",
+ code:`<p id="intro">id 一个元素一个，全页面唯一</p>
+<p class="highlight big">class 可重复，可多个（空格分隔）</p>
+
+<!-- CSS:  #intro {}   .highlight {} -->
+<!-- JS:   querySelector("#intro") -->`},
+
+{cat:"html", title:"div 与 span", kw:"块级 行内 容器 block inline",
+ desc:"div 块级（独占一行）用于分组；span 行内（嵌在文字里）。",
+ code:`<div>我是一个块，独占一行</div>
+<p>这句话里<span class="mark">这几个字</span>被 span 包住</p>`},
+
+{cat:"html", title:"开发者工具查看结构", kw:"f12 devtools elements 检查 调试",
+ desc:"F12（Cmd+Option+I）→ Elements 面板。前端最好的免费教材。",
+ code:`F12 打开开发者工具
+Cmd + Shift + C   箭头模式：点页面任意元素跳到代码
+双击元素文字       可临时修改（刷新还原）
+
+看到好看的网页就 F12 看人家怎么写的`},
+
+{cat:"html", title:"HTML 注释与转义", kw:"comment 注释 特殊字符 escape",
+ desc:"注释用户看不到但源码可见——别写密码。特殊字符要转义。",
+ code:`<!-- 这是注释 -->
+
+&lt;   显示 <
+&gt;   显示 >
+&amp;  显示 &
+&nbsp; 不换行空格`},
+
+/* ── CSS ─────────────────────────────── */
+{cat:"css", title:"三种引入方式", kw:"link style 行内 外部样式表",
+ desc:"正式项目用外部文件；行内样式尽量避免。",
+ code:`<!-- ✅ 外部文件（标准做法）-->
+<link rel="stylesheet" href="style.css">
+
+<!-- 单文件小页面可用 -->
+<style> p { color: gray; } </style>
+
+<!-- ❌ 行内：无法复用 -->
+<p style="color: red;">避免</p>`},
+
+{cat:"css", title:"基础选择器", kw:"selector 元素 类 id 后代",
+ desc:"日常 90% 用类选择器。类前面有点，id 前面是井号。",
+ code:`p { }              /* 所有 <p> 元素 */
+.highlight { }     /* class="highlight" */
+#header { }        /* id="header" */
+nav a { }          /* nav 里面的所有 a（后代）*/
+h1, h2, h3 { }     /* 多个共用一套样式 */`},
+
+{cat:"css", title:"伪类：hover / focus", kw:"悬停 聚焦 状态 first-child",
+ desc:"元素在特定状态下的样式。",
+ code:`button:hover { background: #1d4ed8; }  /* 鼠标悬停 */
+input:focus { border-color: blue; }    /* 输入框聚焦 */
+li:first-child { font-weight: bold; }  /* 第一个 li */
+li:nth-child(2n) { background: #f9f9f9; }  /* 偶数行 */`},
+
+{cat:"css", title:"盒模型", kw:"box model margin border padding content 外边距 内边距",
+ desc:"每个元素都是盒子：content → padding → border → margin（从内到外）。",
+ code:`.card {
+    width: 300px;
+    padding: 8px 16px;          /* 上下 8，左右 16 */
+    border: 1px solid #ddd;     /* 粗细 样式 颜色 */
+    border-radius: 8px;         /* 圆角 */
+    margin: 24px auto;          /* 左右 auto = 水平居中 */
+}`},
+
+{cat:"css", title:"box-sizing: border-box", kw:"全局重置 reset 宽度计算",
+ desc:"几乎所有项目的第一组 CSS：让 width 包含 padding 和 border。",
+ code:`* {
+    box-sizing: border-box;   /* width = 内容+padding+border */
+    margin: 0;                /* 清掉浏览器默认边距 */
+    padding: 0;
+}`},
+
+{cat:"css", title:"常用单位", kw:"px rem % vh vw 单位选择",
+ desc:"边框用 px、字号间距用 rem、宽度用 %、全屏区块用 vh。",
+ code:`px    像素（绝对）：边框、小间距
+rem   相对根字号（1rem=16px）：字号、间距
+%     相对父元素：宽度
+vw/vh 视口宽/高的 1%：height: 100vh 满屏`},
+
+{cat:"css", title:"Flex 布局速查", kw:"flexbox display flex justify align gap 弹性",
+ desc:"父元素 display: flex，子元素自动变成可灵活排列的项目。现代布局的 80%。",
+ code:`.container {
+    display: flex;
+    flex-direction: row;      /* row 水平 | column 垂直 */
+    justify-content: space-between;  /* 主轴分配 */
+    align-items: center;      /* 交叉轴对齐 */
+    gap: 12px;                /* 项目间距 */
+}
+
+/* justify-content 取值：
+   flex-start | center | flex-end
+   space-between（两端顶格）| space-around */`},
+
+{cat:"css", title:"Flex 配方：完美居中", kw:"居中 center 垂直居中 水平居中",
+ desc:"水平+垂直同时居中，背下来。",
+ code:`.center {
+    display: flex;
+    justify-content: center;   /* 水平 */
+    align-items: center;       /* 垂直 */
+}`},
+
+{cat:"css", title:"Flex 配方：中间撑满", kw:"flex 1 左右布局 grow 撑满",
+ desc:"Todo 行的经典布局：[✓] 标题------ [删除]，标题占掉所有剩余空间。",
+ code:`.row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.row .title { flex: 1; }   /* 这个子元素撑满中间 */`},
+
+{cat:"css", title:"Grid 快速上手", kw:"grid 网格 等宽 卡片",
+ desc:"二维布局。等宽卡片网格用 Grid 最简单；一维排列用 Flex。",
+ code:`.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);   /* 三等分 */
+    gap: 16px;
+}`},
+
+{cat:"css", title:"媒体查询：响应式", kw:"media query responsive 手机 适配 断点",
+ desc:"满足条件时才生效的 CSS。手机优先：默认写手机样式，大屏用 min-width 增强。",
+ code:`/* 默认：手机单列 */
+.cards { display: grid; grid-template-columns: 1fr; }
+
+/* 屏幕 ≥ 768px：三列 */
+@media (min-width: 768px) {
+    .cards { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* 跟随系统深色模式 */
+@media (prefers-color-scheme: dark) {
+    body { background: #12151a; color: #e8ebef; }
+}`,
+ tip:"F12 左上角手机图标（Cmd+Shift+M）模拟手机屏幕调试。"},
+
+{cat:"css", title:"字体与文字", kw:"font-family font-size line-height color 字体栈",
+ desc:"行高 1.5~1.7 阅读最舒适；正文用 #333 别用纯黑。",
+ code:`body {
+    font-family: -apple-system, "PingFang SC",
+                 "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}`},
+
+{cat:"css", title:"按钮手感三件套", kw:"cursor pointer transition hover 按钮样式",
+ desc:"小手光标 + 过渡动画 + hover 变色，立刻显得\"高级\"。",
+ code:`.btn {
+    cursor: pointer;               /* 鼠标变小手 */
+    transition: background 0.2s;   /* 变化带过渡 */
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+}
+.btn:hover { background: #1d4ed8; }`},
+
+{cat:"css", title:"用 F12 调试样式", kw:"styles 面板 覆盖 删除线 调试样式不生效",
+ desc:"Elements → Styles：被覆盖的规则显示删除线；点击值可直接改。先调好再抄回代码。",
+ code:`Styles 面板技巧：
+- 删除线 = 该规则被更具体的规则覆盖
+- 复选框 = 临时开关某条属性
+- 点击数值 + 方向键 = 微调
+- 底部盒模型图 = 实时 margin/padding 数值`},
+
+/* ── JavaScript ─────────────────────────────── */
+{cat:"js", title:"引入 JS 与 console.log", kw:"script defer 控制台 print",
+ desc:"script 加 defer（或放 body 底部）等 HTML 解析完再执行。console.log ≈ print。",
+ code:`<script src="app.js" defer></script>
+
+console.log("Hello");        // 输出在 F12 Console 面板
+console.log("值是:", value); // 可以多个参数`,
+ tip:"不加 defer 且放 head 里：JS 先于元素执行，querySelector 拿到 null——新手第一大坑。"},
+
+{cat:"js", title:"变量：const / let", kw:"声明 var 赋值 python对照",
+ desc:"const 不可重新赋值（默认首选），let 可以。别用 var。",
+ code:`const name = "Alice";    // 默认用 const
+let count = 0;
+count++;                  // 要变的用 let
+
+// Python 对照：
+// True/False/None  →  true/false/null
+// f"hi {name}"     →  \`hi \${name}\`（反引号）`},
+
+{cat:"js", title:"模板字符串", kw:"template literal 反引号 拼接 fstring",
+ desc:"反引号包裹，${} 嵌入变量——JS 版的 f-string。",
+ code:`const msg = \`user \${name} has \${count} todos\`;
+const html = \`
+    多行也可以
+    \${1 + 1} 支持任意表达式
+\`;`},
+
+{cat:"js", title:"=== 与 == 的区别", kw:"相等 比较 类型转换 严格相等",
+ desc:"永远用三等号。双等号做隐式类型转换（\"1\" == 1 是 true），是 bug 之源。",
+ code:`1 === 1        // true
+"1" === 1      // false ✅ 符合直觉
+"1" == 1       // true  ❌ 永远别用 ==
+
+if (count !== 0) { ... }   // 不等也用三个符号`},
+
+{cat:"js", title:"函数与箭头函数", kw:"function arrow => 回调",
+ desc:"箭头函数是现代主流，尤其做回调时；单条 return 可省略大括号。",
+ code:`function greet(name) {           // 传统声明
+    return \`Hello, \${name}!\`;
+}
+
+const greet2 = (name) => {        // 箭头函数
+    return \`Hello, \${name}!\`;
+};
+
+const double = (n) => n * 2;      // 简写：省略 {} 和 return`},
+
+{cat:"js", title:"数组方法 map / filter / find", kw:"列表推导式 转换 过滤 查找",
+ desc:"对照 Python：map ≈ 列表推导式、filter ≈ 条件过滤、find ≈ next()。",
+ code:`const titles = todos.map((t) => t.title);
+// ≈ [t["title"] for t in todos]
+
+const undone = todos.filter((t) => !t.done);
+// ≈ [t for t in todos if not t["done"]]
+
+const target = todos.find((t) => t.id === 2);
+// 找不到返回 undefined`},
+
+{cat:"js", title:"对象（≈ dict）", kw:"object 属性 点号 键值",
+ desc:"键不用引号，访问用点号。遍历数组用 for...of（不是 in！）。",
+ code:`const todo = { id: 1, title: "learn js", done: false };
+todo.title;             // 读取（也可 todo["title"]）
+todo.done = true;       // 修改
+
+for (const t of todos) {    // 遍历数组：of
+    console.log(t.title);
+}
+for (const key in todo) {   // 遍历对象的键：in
+    console.log(key, todo[key]);
+}`},
+
+{cat:"js", title:"查找 DOM 元素", kw:"queryselector getelementbyid 选择器 获取元素",
+ desc:"querySelector 的参数就是 CSS 选择器。",
+ code:`const btn = document.querySelector("#submit");   // 按 id
+const card = document.querySelector(".card");     // 第一个匹配
+const items = document.querySelectorAll("li");    // 全部（可遍历）
+
+// 老写法效果相同：
+document.getElementById("submit");`},
+
+{cat:"js", title:"读写内容：textContent / value", kw:"innerhtml 修改内容 表单取值 xss",
+ desc:"安全铁律：显示用户输入一律 textContent；表单元素取值用 .value。",
+ code:`el.textContent = "纯文本，最安全";
+el.innerHTML = "<b>能解析标签</b>";  // ⚠️ 别放用户输入（XSS）
+
+input.value;             // 表单取值（不是 textContent！）
+input.value = "";        // 清空输入框`},
+
+{cat:"js", title:"classList 切换样式", kw:"add remove toggle 类名 改样式",
+ desc:"改样式优先切换预先写好的 CSS 类，样式归 CSS 管。",
+ code:`el.classList.add("highlight");
+el.classList.remove("highlight");
+el.classList.toggle("dark");      // 有则删、无则加
+el.classList.contains("done");    // 判断 → true/false`},
+
+{cat:"js", title:"创建与删除元素", kw:"createelement append remove 动态添加",
+ desc:"创建 → 设置内容 → 挂到页面（不挂看不见）。",
+ code:`const li = document.createElement("li");
+li.textContent = "new todo";
+document.querySelector("ul").append(li);   // 挂上去
+
+li.remove();                               // 删除`},
+
+{cat:"js", title:"事件监听 addEventListener", kw:"click input change submit 点击 监听",
+ desc:"常用事件：click、input（每敲一字）、change（改完失焦）、submit、keydown。",
+ code:`btn.addEventListener("click", () => {
+    console.log("clicked!");
+});
+
+search.addEventListener("input", () => {
+    console.log(search.value);    // 实时监听输入
+});
+
+checkbox.addEventListener("change", () => { ... });`},
+
+{cat:"js", title:"表单提交与 preventDefault", kw:"submit 阻止默认 刷新页面",
+ desc:"表单默认提交会刷新页面——JS 接管时必须拦截。",
+ code:`form.addEventListener("submit", (event) => {
+    event.preventDefault();       // ← 拦住默认刷新
+    const title = input.value.trim();
+    if (!title) return;           // 空内容不提交
+    // ...由 JS 处理提交...
+});`},
+
+{cat:"js", title:"fetch GET 请求", kw:"请求 获取数据 api 调用后端",
+ desc:"两个 await：第一个等响应头，第二个等响应体解析。",
+ code:`const response = await fetch("http://127.0.0.1:8000/todos");
+const todos = await response.json();
+
+// 用了 await 的函数必须 async（和 Python 同规则）：
+async function loadTodos() {
+    const res = await fetch(\`\${API}/todos\`);
+    return await res.json();
+}`},
+
+{cat:"js", title:"fetch POST / PUT / DELETE", kw:"发送 json body headers 增删改",
+ desc:"POST/PUT 三件套：method + headers + body。DELETE 无 body。",
+ code:`await fetch(\`\${API}/todos\`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "learn fetch" }),
+});
+
+await fetch(\`\${API}/todos/1\`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ done: true }),   // 部分更新
+});
+
+await fetch(\`\${API}/todos/1\`, { method: "DELETE" });`},
+
+{cat:"js", title:"fetch 错误处理（两道防线）", kw:"response.ok try catch 404 422 failed",
+ desc:"fetch 对 404/500 不报错！必须查 response.ok；网络断了才走 catch。",
+ code:`try {
+    const response = await fetch(url, options);
+    if (!response.ok) {                     // 防线 1：HTTP 错误
+        const err = await response.json();
+        throw new Error(err.detail || \`HTTP \${response.status}\`);
+    }
+    return await response.json();
+} catch (err) {                             // 防线 2：网络错误
+    console.error("failed:", err);
+}`,
+ tip:"漏了 !response.ok 检查，422 的错误响应会被当正常数据渲染——新手最易漏。"},
+
+{cat:"js", title:"JSON 两个转换函数", kw:"stringify parse 序列化 python对照 dumps loads",
+ desc:"发出去前 stringify（≈ json.dumps）；收进来后 response.json()（≈ json.loads）。",
+ code:`JSON.stringify({ title: "abc" })   // 对象 → JSON 字符串
+JSON.parse('{"title":"abc"}')      // JSON 字符串 → 对象
+
+// fetch 里通常不用 parse，直接：
+const data = await response.json();`},
+
+{cat:"js", title:"常见报错速查", kw:"null undefined not defined 排错 报错",
+ desc:"JS 新手三大报错的定位方法。",
+ code:`Cannot read properties of null (reading 'xxx')
+→ 元素没找到：选择器拼错，或 JS 先于 HTML 执行（加 defer）
+
+xxx is not defined
+→ 变量名拼错 / 忘了声明
+
+Assignment to constant variable
+→ 给 const 重新赋值了，改用 let
+
+调试三板斧：console.log → F12 Console 看第一条红字
+→ Sources 面板打断点`},
 ];
 
 /* ── 渲染 ─────────────────────────────── */

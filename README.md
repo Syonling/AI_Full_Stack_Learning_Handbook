@@ -4,7 +4,7 @@
 **Python 基础、Git、日志与调试、FastAPI、SQLite、配置与工程化、部署**，以及进阶选修的 **AI Agent 开发**。
 
 > 🌐 **在线阅读**：本项目是一个 VitePress 文档站，push 到 GitHub 后自动部署（见文末「网站开发与部署」）。
-> 部署后访问 `https://<你的用户名>.github.io/<仓库名>/`。
+> 为了清空 Fable5 额度。
 
 ## 三种使用方式
 
@@ -21,11 +21,11 @@
 ─────────       ─────────────────────────      ─────────────────
 01 Python  ──▶  04 FastAPI 入门                08 配置与环境变量
 02 Git          05 SQLite 基础          ──▶    09 FastAPI 工程化
-03 日志与调试    06 FastAPI 进阶                10 测试与结构
-                07 整合实战（跑 demo！）        11 部署入门
+03 日志与调试     06 FastAPI 进阶                10 测试与结构
+                07 整合实战（跑 demo！）         11 部署入门
                                                     │
                                                     ▼
-                                          12 AI Agent 开发（进阶选修）
+                                               12 AI Agent 开发（进阶选修）
 ```
 
 | 顺序 | 章节 | 内容 | 预计时间 |
@@ -42,6 +42,13 @@
 | 10 | [测试与结构](docs/10-testing-and-structure.md) | curl、pytest、项目结构、进阶路线 | 2~3 小时 |
 | 11 | [部署入门](docs/11-deployment.md) | 生产运行、进程守护、Docker、上线检查清单 | 3~4 小时 |
 | 12 | [AI Agent 开发](docs/12-ai-agents.md) | Agent 原理、Tool Use、MCP、Skill、LangChain、LangGraph（纯教学，无 demo） | 4~6 小时 |
+| 13 | [HTML 基础](docs/13-html-basics.md) | 文档骨架、常用标签、语义化、表单 | 2~3 小时 |
+| 14 | [CSS 基础](docs/14-css-basics.md) | 选择器、盒模型、Flex/Grid、响应式 | 3~4 小时 |
+| 15 | [JavaScript 基础](docs/15-javascript-basics.md) | 变量函数、数组对象、DOM、事件（Python 对照讲解） | 3~4 小时 |
+| 16 | [JS 网络与联调](docs/16-js-network-and-integration.md) | fetch、async/await、给 Todo API 写完整前端（与 demo/frontend 对应）★ | 4~5 小时 |
+| 17 | [Vue 3 入门](docs/17-vue-basics.md) | 响应式、指令、用 Vue 重写 Todo 页面 | 4~5 小时 |
+
+> 🎨 前端章节（13~17）可与后端并行学习：HTML/CSS 无前置依赖；16 章需要 demo 后端能跑（07 章）；17 章需先完成 16 章。
 
 > 💡 学习方法建议：**每章边读边敲代码**（不要复制粘贴）；从 02 章开始每章练习完成后 `git commit` 一次；
 > 读完 07 章一定把 [demo/](demo/) 完整跑一遍，08、09 章会带你解锁 demo 里的"生产四件套"。
@@ -82,11 +89,15 @@ learning_from_claude/
     ├── README.md        ← 运行步骤
     ├── requirements.txt
     ├── .env.example     ← 配置模板（复制为 .env 使用）
-    └── app/
-        ├── main.py      ← 路由 + 日志/中间件/异常兜底/lifespan
-        ├── config.py    ← pydantic-settings 配置
-        ├── database.py
-        └── schemas.py
+    ├── app/
+    │   ├── main.py      ← 路由 + 日志/中间件/异常兜底/lifespan
+    │   ├── config.py    ← pydantic-settings 配置
+    │   ├── database.py
+    │   └── schemas.py
+    └── frontend/        ← 原生 JS 前端页面（对应 16 章，直接双击打开）
+        ├── index.html   ← 结构（13 章）
+        ├── style.css    ← 样式（14 章）
+        └── app.js       ← 行为：fetch 调用 Todo API（15/16 章）
 ```
 
 ## 网站开发与部署（VitePress）

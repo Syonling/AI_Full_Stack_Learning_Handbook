@@ -69,6 +69,17 @@ export default defineConfig({
         collapsed: false,
         items: [{ text: '12 · AI Agent 开发', link: '/12-ai-agents' }],
       },
+      {
+        text: '前端开发',
+        collapsed: false,
+        items: [
+          { text: '13 · HTML 基础', link: '/13-html-basics' },
+          { text: '14 · CSS 基础', link: '/14-css-basics' },
+          { text: '15 · JavaScript 基础', link: '/15-javascript-basics' },
+          { text: '16 · JS 网络与联调', link: '/16-js-network-and-integration' },
+          { text: '17 · Vue 3 入门', link: '/17-vue-basics' },
+        ],
+      },
     ],
 
     // ── 上一章 / 下一章（按 sidebar 顺序自动生成）──

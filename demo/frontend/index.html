@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 结构层（对应 docs/13 章）。样式和行为拆分到独立文件——正式项目的标准组织方式 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List · demo 前端</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>   <!-- defer：等 HTML 解析完再执行（docs/15 第 1 节）-->
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>Todo List</h1>
+            <p class="subtitle">原生 JS 前端 ⇄ FastAPI 后端（对应 docs/16 章）</p>
+        </header>
+
+        <!-- 错误提示横幅：默认隐藏，出错时由 JS 填入内容并显示 -->
+        <div id="error-banner" class="error-banner hidden"></div>
+
+        <!-- 添加表单：submit 事件由 JS 接管（preventDefault）-->
+        <form id="add-form" class="add-form">
+            <input type="text" id="new-title" placeholder="要做什么？" autocomplete="off">
+            <button type="submit">添加</button>
+        </form>
+
+        <!-- 列表容器：内容全部由 app.js 渲染 -->
+        <ul id="todo-list"></ul>
+
+        <footer>
+            <p id="count"></p>
+        </footer>
+    </main>
+</body>
+</html>

@@ -64,6 +64,14 @@ features:
 | 10 | [测试与结构](/10-testing-and-structure) | curl、pytest、项目结构、进阶路线 | 2~3 小时 |
 | 11 | [部署入门](/11-deployment) | 生产运行、进程守护、Docker、上线检查清单 | 3~4 小时 |
 | 12 | [AI Agent 开发](/12-ai-agents) | Agent 原理、Tool Use、MCP、Skill、LangChain、LangGraph | 4~6 小时 |
+| 13 | [HTML 基础](/13-html-basics) | 文档骨架、常用标签、语义化、表单 | 2~3 小时 |
+| 14 | [CSS 基础](/14-css-basics) | 选择器、盒模型、Flex/Grid、响应式 | 3~4 小时 |
+| 15 | [JavaScript 基础](/15-javascript-basics) | 变量函数、数组对象、DOM、事件（Python 对照讲解） | 3~4 小时 |
+| 16 | [JS 网络与联调](/16-js-network-and-integration) | fetch、async/await、给 Todo API 写完整前端 ★ | 4~5 小时 |
+| 17 | [Vue 3 入门](/17-vue-basics) | 响应式、指令、用 Vue 重写 Todo 页面 | 4~5 小时 |
+
+> 🎨 **前端章节（13~17）无需按总编号顺序等待**——HTML/CSS 没有任何前置依赖，可与后端章节并行学习；
+> 16 章需要后端 demo 能跑起来（07 章），17 章需要先完成 16 章。
 
 ::: tip 学习方法建议
 **每章边读边敲代码**（不要复制粘贴）；从 02 章开始每章练习完成后 `git commit` 一次；
