@@ -3,6 +3,9 @@
 > 本章目标：建立 AI Agent 开发的完整概念地图，看懂并能写出基础的 Agent 代码。
 > 本章为**纯教学章节**（不含配套 demo 项目），代码示例可自行创建文件练习。
 > 预计学习时间：4~6 小时。建议先学完 01（Python 基础）和 04（FastAPI 入门）。
+::: details 关联教程
+[OpenAI-Agentic AI](https://www.deeplearning.ai/courses/agentic-ai)
+:::
 
 ---
 

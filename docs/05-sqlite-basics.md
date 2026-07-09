@@ -2,6 +2,9 @@
 
 > 本章目标：学会用 SQL 语句和 Python 的 `sqlite3` 标准库对数据库做增删改查。
 > 预计学习时间：3~4 小时。本章代码不需要 FastAPI，可以在任何 .py 文件里直接练。
+::: details 关联教程
+[零基础入门学习「SQLite」](https://www.bilibili.com/video/BV1zy411i7UV)
+:::
 
 ---
 

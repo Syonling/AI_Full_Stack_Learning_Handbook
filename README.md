@@ -1,10 +1,13 @@
 # AI 全栈学习手册
 
+![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-blue)
+
 为 0 基础全栈学习者准备的一套「学习 + 速查 + 实践」系统，覆盖 Python 后端开发核心：
 **Python 基础、Git、日志与调试、FastAPI、SQLite、配置与工程化、部署**，以及进阶选修的 **AI Agent 开发**。
 
 > 🌐 **在线阅读**：本项目是一个 VitePress 文档站，push 到 GitHub 后自动部署（见文末「网站开发与部署」）。
-> 为了清空 Fable5 额度。
+
+> 为了清空 Fable5 额度 >v<
 
 ## 三种使用方式
 
@@ -22,10 +25,10 @@
 01 Python  ──▶  04 FastAPI 入门                08 配置与环境变量
 02 Git          05 SQLite 基础          ──▶    09 FastAPI 工程化
 03 日志与调试     06 FastAPI 进阶                10 测试与结构
-                07 整合实战（跑 demo！）         11 部署入门
+                07 整合实战（跑 demo！）          11 部署入门
                                                     │
                                                     ▼
-                                               12 AI Agent 开发（进阶选修）
+                                            12 AI Agent 开发（进阶选修）
 ```
 
 | 顺序 | 章节 | 内容 | 预计时间 |
@@ -114,3 +117,8 @@ npm run docs:preview   # 本地预览构建结果
 1. 以本目录为仓库根 `git init`，推送到 GitHub
 2. 仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**
 3. 之后每次 `git push`，[.github/workflows/deploy.yml](.github/workflows/deploy.yml) 自动构建并部署
+
+
+## 📄 License
+
+CC BY-NC 4.0 (Non-Commercial Use)
