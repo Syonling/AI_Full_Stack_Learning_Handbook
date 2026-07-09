@@ -1,0 +1,21 @@
+# Node / VitePress
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# 构建时从根 handbook.html 自动复制的副本，不手动维护
+docs/public/handbook.html
+
+# Python（demo 项目）
+.venv/
+__pycache__/
+*.pyc
+*.db
+*.sqlite3
+
+# 密钥与本地配置（见 docs/08 章）
+.env
+
+# 编辑器 / 系统
+.vscode/
+.DS_Store

@@ -1,0 +1,16 @@
+{
+  "name": "ai-fullstack-handbook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI 全栈学习手册 —— FastAPI / SQLite / Python 后端 / AI Agent",
+  "scripts": {
+    "sync-handbook": "cp handbook.html docs/public/handbook.html",
+    "docs:dev": "npm run sync-handbook && vitepress dev docs",
+    "docs:build": "npm run sync-handbook && vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}

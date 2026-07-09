@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FastAPI + SQLite 速查手册</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #1a1f27;
+    --muted: #5b6472;
+    --border: #e3e6ea;
+    --accent: #2563eb;
+    --accent-soft: #eff4ff;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+    --tip-bg: #fffaeb;
+    --tip-border: #f5d87a;
+    --tip-text: #7a5b00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a;
+      --card: #1b2028;
+      --text: #e8ebef;
+      --muted: #9aa4b1;
+      --border: #2a313b;
+      --accent: #60a5fa;
+      --accent-soft: #1d2a42;
+      --code-bg: #0b1220;
+      --code-text: #dbe4f0;
+      --tip-bg: #2a2415;
+      --tip-border: #6b5716;
+      --tip-text: #e8c96a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 18px; margin: 0; white-space: nowrap; }
+  header h1 small { color: var(--muted); font-weight: normal; font-size: 12px; margin-left: 8px; }
+  #search {
+    flex: 1; min-width: 220px; max-width: 560px;
+    padding: 10px 16px;
+    font-size: 15px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  #search:focus { border-color: var(--accent); }
+  #count { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .layout { display: flex; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
+  nav {
+    position: sticky; top: 66px;
+    width: 180px; flex-shrink: 0;
+    padding: 20px 12px;
+    max-height: calc(100vh - 66px);
+    overflow-y: auto;
+  }
+  nav button {
+    display: block; width: 100%;
+    text-align: left;
+    padding: 8px 12px; margin-bottom: 2px;
+    font-size: 14px;
+    border: none; border-radius: 8px;
+    background: transparent; color: var(--text);
+    cursor: pointer;
+  }
+  nav button:hover { background: var(--accent-soft); }
+  nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  nav button .n { color: var(--muted); font-size: 12px; float: right; }
+  main { flex: 1; padding: 20px 24px 80px; min-width: 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .card h3 { margin: 0 0 4px; font-size: 16px; }
+  .badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 2px 8px; border-radius: 20px;
+    margin-left: 8px; vertical-align: 2px;
+  }
+  .card p.desc { margin: 4px 0 10px; color: var(--muted); font-size: 14px; }
+  .codewrap { position: relative; }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; }
+  .copy {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border: none; border-radius: 6px;
+    background: rgba(255,255,255,0.12);
+    color: #cbd5e1;
+    cursor: pointer;
+  }
+  .copy:hover { background: rgba(255,255,255,0.25); }
+  .tip {
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: var(--tip-bg);
+    border: 1px solid var(--tip-border);
+    color: var(--tip-text);
+    border-radius: 8px;
+  }
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; }
+  mark { background: #ffe58a; color: #1a1f27; border-radius: 2px; padding: 0 1px; }
+  @media (max-width: 720px) {
+    .layout { flex-direction: column; }
+    nav { position: static; width: 100%; display: flex; flex-wrap: wrap; gap: 4px; max-height: none; padding: 10px 16px 0; }
+    nav button { width: auto; }
+    nav button .n { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>⚡ FastAPI + SQLite 速查手册<small>中文讲解 · 点击代码右上角复制</small></h1>
+  <input id="search" type="search" placeholder="搜索关键词，如：路由 / POST / 分页 / commit / 404 …" autofocus>
+  <span id="count"></span>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="list"></main>
+</div>
+
+<script>
+const CATS = {
+  all:     "全部",
+  python:  "Python 基础",
+  fastapi: "FastAPI",
+  pydantic:"Pydantic 模型",
+  sqlite:  "SQLite / sqlite3",
+  sql:     "SQL 语句",
+  integ:   "整合实战",
+  git:     "Git 版本控制",
+  logdbg:  "日志与调试",
+  config:  "配置与工程化",
+  deploy:  "部署",
+  test:    "测试",
+  errors:  "常见错误",
+  agent:   "AI Agent 开发",
+};
+
+/* 每条 = { cat, title, desc, code, tip?, kw(额外搜索词) } */
+const DATA = [
+
+/* ── Python 基础 ─────────────────────────────── */
+{cat:"python", title:"创建并激活虚拟环境 venv", kw:"virtual environment 环境隔离 activate",
+ desc:"每个项目一个独立的依赖空间，开始任何项目前先做这一步。",
+ code:`python3 -m venv .venv          # 创建（生成 .venv 文件夹）
+source .venv/bin/activate      # 激活（macOS/Linux）
+deactivate                     # 退出`,
+ tip:"每次打开新终端都要重新激活。命令行前面出现 (.venv) 说明激活成功。"},
+
+{cat:"python", title:"pip 安装与导出依赖", kw:"install requirements 包管理",
+ desc:"安装库、查看已装的库、导出/恢复依赖清单。",
+ code:`pip install fastapi uvicorn        # 安装
+pip list                           # 查看已安装
+pip freeze > requirements.txt      # 导出依赖清单
+pip install -r requirements.txt    # 按清单安装`},
+
+{cat:"python", title:"类型注解基础", kw:"type hints annotation 标注",
+ desc:"FastAPI 靠类型注解做参数解析和校验，必须掌握。",
+ code:`name: str = "Alice"
+age: int = 25
+tags: list[str] = ["python", "fastapi"]
+scores: dict[str, int] = {"math": 90}
+
+def greet(name: str) -> str:
+    return f"Hello, {name}!"`},
+
+{cat:"python", title:"可选类型 | None", kw:"optional 可空 默认值",
+ desc:"值可能不存在时的标准写法（Python 3.10+）。",
+ code:`def find_user(user_id: int) -> str | None:
+    if user_id == 1:
+        return "Alice"
+    return None    # 没找到
+
+# 带默认值的可选参数
+def paginate(page: int = 1, size: int = 10) -> dict:
+    return {"page": page, "size": size}`},
+
+{cat:"python", title:"字典读写与安全取值", kw:"dict get keyerror 键值对",
+ desc:"后端 JSON 数据在 Python 里就是字典。get() 取不存在的键不会报错。",
+ code:`user = {"id": 1, "name": "Alice"}
+
+user["name"]             # 读取（键不存在报 KeyError）
+user.get("email")        # 安全读取，不存在返回 None
+user.get("email", "")    # 指定默认值
+user["age"] = 25         # 写入 / 修改
+del user["age"]          # 删除
+"name" in user           # 判断键是否存在 → True`},
+
+{cat:"python", title:"字典遍历", kw:"items keys values for 循环",
+ desc:"同时拿到键和值用 items()。",
+ code:`user = {"id": 1, "name": "Alice"}
+for key, value in user.items():
+    print(key, "=", value)`},
+
+{cat:"python", title:"列表推导式", kw:"list comprehension 过滤 转换 map filter",
+ desc:"从列表生成新列表，后端代码最常用的语法之一。",
+ code:`todos = [{"title": "a", "done": True}, {"title": "b", "done": False}]
+
+titles = [t["title"] for t in todos]           # 提取字段
+undone = [t for t in todos if not t["done"]]   # 条件过滤
+rows_as_dict = [dict(r) for r in rows]         # 数据库行转字典`},
+
+{cat:"python", title:"在列表中查找单个元素", kw:"next find 查找 搜索",
+ desc:"按条件找第一个匹配项，找不到返回 None。",
+ code:`todos = [{"id": 1}, {"id": 2}]
+target = next((t for t in todos if t["id"] == 2), None)
+if target is None:
+    print("not found")`},
+
+{cat:"python", title:"f-string 字符串格式化", kw:"format 拼接 模板字符串",
+ desc:"字符串里直接嵌入变量，拼消息和日志的标准写法。",
+ code:`name, count = "Alice", 3
+msg = f"user {name} has {count} todos"
+price = f"total: {19.9 * 2:.2f}"    # 保留两位小数
+debug = f"{name=}"                   # 调试 → name='Alice'`},
+
+{cat:"python", title:"try / except 异常处理", kw:"exception error finally 捕获",
+ desc:"处理可能出错的代码，防止程序崩溃。finally 无论如何都执行。",
+ code:`try:
+    user = {"name": "Alice"}
+    print(user["age"])
+except KeyError as e:
+    print(f"missing key: {e}")
+except Exception as e:          # 兜底
+    print(f"unexpected: {e}")
+finally:
+    print("cleanup")            # 常用于关闭连接`},
+
+{cat:"python", title:"raise 主动抛出异常", kw:"throw 抛错 valueerror",
+ desc:"发现非法情况时中断执行。FastAPI 的 HTTPException 就是这样用的。",
+ code:`def set_age(age: int):
+    if age < 0:
+        raise ValueError("age cannot be negative")`},
+
+{cat:"python", title:"async / await 基础", kw:"异步 asyncio coroutine 协程",
+ desc:"函数体内用了 await 就必须写 async def；否则普通 def 即可。",
+ code:`import asyncio
+
+async def slow_task() -> str:
+    await asyncio.sleep(1)     # await 只能出现在 async 函数里
+    return "done"`,
+ tip:"FastAPI 路由函数写 def 或 async def 都可以，初学阶段不必纠结。"},
+
+{cat:"python", title:"模块导入 import", kw:"from module 多文件 拆分",
+ desc:"把代码拆到多个文件后互相引用。文件名去掉 .py 就是模块名。",
+ code:`# database.py 里有 get_connection 函数时：
+import database
+conn = database.get_connection()
+
+from database import get_connection     # 更常用
+conn = get_connection()
+
+import database as db                   # 起别名
+conn = db.get_connection()`},
+
+/* ── FastAPI ─────────────────────────────── */
+{cat:"fastapi", title:"最小 FastAPI 应用", kw:"hello world 入门 创建应用 app",
+ desc:"三行核心代码：导入、创建实例、注册路由。",
+ code:`from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello, FastAPI!"}`},
+
+{cat:"fastapi", title:"启动服务器 uvicorn", kw:"run server 运行 启动 reload",
+ desc:"main 是文件名（main.py），app 是代码里的变量名。",
+ code:`uvicorn main:app --reload
+# --reload：改代码自动重启（仅开发用）
+# 停止：Ctrl + C
+
+uvicorn main:app --reload --port 8001    # 换端口
+uvicorn main:app --host 0.0.0.0          # 局域网可访问`,
+ tip:"必须在 main.py 所在文件夹里执行，否则报 Could not import module。"},
+
+{cat:"fastapi", title:"自动文档 /docs", kw:"swagger openapi redoc 交互文档 测试",
+ desc:"FastAPI 自动生成的交互式文档，写完接口马上测。",
+ code:`# 启动后浏览器打开：
+http://127.0.0.1:8000/docs      # Swagger UI（可直接发请求测试）
+http://127.0.0.1:8000/redoc     # ReDoc（适合阅读）`,
+ tip:"点 Try it out → 填参数 → Execute。页面还会给出等价的 curl 命令。"},
+
+{cat:"fastapi", title:"GET 路由（读取）", kw:"route 查询 列表 读",
+ desc:"GET 用于读取数据，返回的字典/列表自动转 JSON。",
+ code:`@app.get("/todos")
+def list_todos():
+    return [{"id": 1, "title": "learn fastapi"}]`},
+
+{cat:"fastapi", title:"POST 路由（新建）", kw:"create 创建 新增 提交",
+ desc:"POST 用于新建数据，通常配合请求体（Pydantic 模型）。",
+ code:`@app.post("/todos", status_code=201)
+def create_todo(todo: TodoCreate):
+    return {"message": "created"}`},
+
+{cat:"fastapi", title:"PUT 路由（更新）", kw:"update 修改 编辑",
+ desc:"PUT 用于更新已有数据，路径里带资源 id。",
+ code:`@app.put("/todos/{todo_id}")
+def update_todo(todo_id: int, todo: TodoUpdate):
+    return {"message": f"updated {todo_id}"}`},
+
+{cat:"fastapi", title:"DELETE 路由（删除）", kw:"remove 删除 204",
+ desc:"DELETE 用于删除数据，成功通常返回 204（无内容）。",
+ code:`@app.delete("/todos/{todo_id}", status_code=204)
+def delete_todo(todo_id: int):
+    return None`},
+
+{cat:"fastapi", title:"路径参数", kw:"path parameter {id} 动态路径",
+ desc:"路径中 {} 占位，类型注解自动转换并校验（传 abc 会自动返回 422）。",
+ code:`@app.get("/todos/{todo_id}")
+def get_todo(todo_id: int):        # /todos/5 → todo_id = 5 (int)
+    return {"todo_id": todo_id}
+
+@app.get("/users/{user_id}/todos/{todo_id}")   # 多个路径参数
+def get_user_todo(user_id: int, todo_id: int):
+    return {"user_id": user_id, "todo_id": todo_id}`},
+
+{cat:"fastapi", title:"固定路径要写在动态路径前面", kw:"路由顺序 order 匹配",
+ desc:"路由按注册顺序匹配，/todos/all 必须在 /todos/{id} 之前注册。",
+ code:`@app.get("/todos/all")          # ✅ 先注册固定路径
+def all_todos(): ...
+
+@app.get("/todos/{todo_id}")    # 再注册动态路径
+def get_todo(todo_id: int): ...`},
+
+{cat:"fastapi", title:"查询参数", kw:"query parameter ?done=true 过滤 filter",
+ desc:"URL 中 ? 后面的部分。函数参数不在路径 {} 里的自动成为查询参数。",
+ code:`@app.get("/todos")
+def list_todos(done: bool | None = None, limit: int = 10):
+    return {"done": done, "limit": limit}
+
+# /todos                  → done=None, limit=10
+# /todos?done=true&limit=5 → done=True, limit=5`},
+
+{cat:"fastapi", title:"必填 vs 可选查询参数", kw:"required optional 默认值",
+ desc:"有没有默认值决定了参数是否必填。",
+ code:`def route(
+    a: int,                    # 必填（不传报 422）
+    b: int = 10,               # 可选，默认 10
+    c: bool | None = None,     # 可选，不传时为 None
+): ...`},
+
+{cat:"fastapi", title:"请求体：接收 JSON 数据", kw:"request body post json 提交数据",
+ desc:"参数注解为 Pydantic 模型 → FastAPI 自动从请求体解析并校验。",
+ code:`from pydantic import BaseModel
+
+class TodoCreate(BaseModel):
+    title: str
+    done: bool = False
+
+@app.post("/todos")
+def create_todo(todo: TodoCreate):
+    return {"received": todo.model_dump()}`},
+
+{cat:"fastapi", title:"三种参数混用的规则", kw:"path query body 区分 识别",
+ desc:"在路径里 → 路径参数；是 Pydantic 模型 → 请求体；其余 → 查询参数。",
+ code:`@app.put("/todos/{todo_id}")
+def update_todo(
+    todo_id: int,          # 路径参数（出现在路径 {} 里）
+    todo: TodoCreate,      # 请求体（Pydantic 模型）
+    notify: bool = False,  # 查询参数（其余）
+): ...`},
+
+{cat:"fastapi", title:"指定成功状态码", kw:"status_code 201 204 created",
+ desc:"POST 成功用 201，DELETE 成功用 204（无内容）。",
+ code:`from fastapi import status
+
+@app.post("/todos", status_code=status.HTTP_201_CREATED)
+def create_todo(): ...
+
+@app.delete("/todos/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_todo(id: int):
+    return None`},
+
+{cat:"fastapi", title:"HTTPException 返回错误", kw:"404 not found 错误 异常 detail",
+ desc:"业务出错时用 raise（不是 return！）抛出，客户端收到对应状态码。",
+ code:`from fastapi import HTTPException
+
+@app.get("/todos/{todo_id}")
+def get_todo(todo_id: int):
+    row = find_in_db(todo_id)
+    if row is None:
+        raise HTTPException(status_code=404,
+                            detail=f"todo {todo_id} not found")
+    return row`,
+ tip:"客户端收到：HTTP 404 + {\"detail\": \"todo 1 not found\"}"},
+
+{cat:"fastapi", title:"CORS 跨域配置", kw:"cross origin 前后端分离 blocked 跨域",
+ desc:"前端页面和后端不在同一来源时，必须配置 CORS，否则浏览器拦截请求。",
+ code:`from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],     # 学习用；生产写具体域名
+    allow_methods=["*"],
+    allow_headers=["*"],
+)`},
+
+{cat:"fastapi", title:"依赖注入 Depends", kw:"dependency injection yield 复用 get_db",
+ desc:"把多个接口共用的准备/收尾工作抽成函数，FastAPI 自动调用。",
+ code:`from fastapi import Depends
+
+def get_db():
+    conn = create_connection()   # yield 前 = 准备
+    try:
+        yield conn               # 交给路由函数
+    finally:
+        conn.close()             # yield 后 = 收尾（必执行）
+
+@app.get("/todos")
+def list_todos(db = Depends(get_db)):
+    ...`},
+
+{cat:"fastapi", title:"文件上传 UploadFile", kw:"upload file multipart 文件",
+ desc:"需要先 pip install python-multipart。",
+ code:`from fastapi import UploadFile
+
+@app.post("/upload")
+async def upload_file(file: UploadFile):
+    content = await file.read()      # bytes
+    return {"filename": file.filename, "size": len(content)}`},
+
+{cat:"fastapi", title:"挂载静态文件 / 返回前端页面", kw:"static html fileresponse mount 前端",
+ desc:"后端直接托管前端页面，可以避开 CORS 问题。",
+ code:`from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def index():
+    return FileResponse("static/index.html")`},
+
+{cat:"fastapi", title:"APIRouter 路由分组", kw:"router include_router 模块化 拆分路由",
+ desc:"接口多了以后，按资源拆到不同文件。",
+ code:`# routers/todos.py
+from fastapi import APIRouter
+router = APIRouter(prefix="/todos", tags=["todos"])
+
+@router.get("")           # 实际路径 = /todos
+def list_todos(): ...
+
+# main.py
+from routers import todos
+app.include_router(todos.router)`},
+
+/* ── Pydantic ─────────────────────────────── */
+{cat:"pydantic", title:"BaseModel 定义数据模型", kw:"schema 模型 数据结构 校验",
+ desc:"定义 API 收发数据的结构，自动完成类型校验。",
+ code:`from pydantic import BaseModel
+
+class TodoCreate(BaseModel):
+    title: str                # 必填
+    description: str = ""     # 选填，有默认值
+    done: bool = False`},
+
+{cat:"pydantic", title:"Field 精细校验", kw:"validation min_length ge le 长度 范围",
+ desc:"限制长度、数值范围等，校验失败自动返回 422。",
+ code:`from pydantic import BaseModel, Field
+
+class TodoCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=100)  # ...表示必填
+    priority: int = Field(default=1, ge=1, le=5)  # 1 ≤ priority ≤ 5
+    note: str = Field(default="", description="shows in /docs")`},
+
+{cat:"pydantic", title:"嵌套模型", kw:"nested 嵌套 列表模型",
+ desc:"模型里嵌模型，对应嵌套的 JSON。",
+ code:`class Tag(BaseModel):
+    name: str
+
+class TodoCreate(BaseModel):
+    title: str
+    tags: list[Tag] = []
+
+# 对应 JSON：{"title": "x", "tags": [{"name": "life"}]}`},
+
+{cat:"pydantic", title:"模型与字典互转", kw:"model_dump dict json 转换 序列化",
+ desc:"model_dump() 转字典；TodoCreate(**data) 从字典创建（触发校验）。",
+ code:`todo = TodoCreate(title="learn", done=False)
+todo.title                # 属性访问
+todo.model_dump()         # → {"title": "learn", "done": False}
+todo.model_dump_json()    # → JSON 字符串
+
+data = {"title": "learn"}
+todo2 = TodoCreate(**data)   # 字典 → 模型（不合法抛 ValidationError）`},
+
+{cat:"pydantic", title:"response_model 控制返回数据", kw:"响应模型 过滤 隐藏字段 password",
+ desc:"定义返回给客户端的数据结构，多余字段（如密码）自动过滤。",
+ code:`class UserIn(BaseModel):
+    username: str
+    password: str
+
+class UserOut(BaseModel):     # 不含 password
+    username: str
+
+@app.post("/users", response_model=UserOut)
+def create_user(user: UserIn):
+    return user               # password 会被自动过滤掉`},
+
+{cat:"pydantic", title:"Create / Update / Out 三模型模式", kw:"套路 命名 部分更新 patch",
+ desc:"一套资源三个模型：新建（无 id）、更新（全可选）、返回（完整）。",
+ code:`class TodoCreate(BaseModel):        # POST 请求体
+    title: str
+    done: bool = False
+
+class TodoUpdate(BaseModel):        # PUT 请求体（只发想改的字段）
+    title: str | None = None
+    done: bool | None = None
+
+class TodoOut(BaseModel):           # 响应（数据库完整记录）
+    id: int
+    title: str
+    done: bool`},
+
+{cat:"pydantic", title:"读懂 422 校验错误", kw:"unprocessable entity 报错 loc msg",
+ desc:"响应的 detail 数组精确指出哪个字段、什么问题。",
+ code:`// 发送 {"title": ""} 时收到 HTTP 422：
+{
+  "detail": [{
+    "loc": ["body", "title"],       // 错误位置：请求体的 title 字段
+    "msg": "String should have at least 1 character",
+    "type": "string_too_short"
+  }]
+}`},
+
+/* ── SQLite ─────────────────────────────── */
+{cat:"sqlite", title:"连接数据库", kw:"connect cursor 游标 db 文件",
+ desc:"数据库就是一个文件，不存在会自动创建。用完记得 close。",
+ code:`import sqlite3
+
+conn = sqlite3.connect("app.db")
+cursor = conn.cursor()
+# ... 执行 SQL ...
+conn.close()`},
+
+{cat:"sqlite", title:"建表 CREATE TABLE", kw:"create table if not exists 主键 autoincrement 表结构",
+ desc:"IF NOT EXISTS 让建表语句可以安全地重复执行。",
+ code:`cursor.execute("""
+    CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        done INTEGER DEFAULT 0
+    )
+""")
+conn.commit()`},
+
+{cat:"sqlite", title:"Row 工厂：按列名访问结果", kw:"row_factory dict 列名 转字典",
+ desc:"设置后查询结果可以用 row[\"title\"] 访问，还能直接 dict(row)。",
+ code:`conn = sqlite3.connect("app.db")
+conn.row_factory = sqlite3.Row     # 连接后立刻设置
+
+row = conn.execute("SELECT * FROM todos WHERE id = 1").fetchone()
+print(row["title"])     # 按列名访问
+print(dict(row))        # 转字典 → 方便返回 JSON`},
+
+{cat:"sqlite", title:"INSERT 插入数据", kw:"insert into values 新增 添加",
+ desc:"? 是占位符，值通过元组传入。插入后必须 commit。",
+ code:`cursor.execute(
+    "INSERT INTO todos (title, description) VALUES (?, ?)",
+    ("learn sqlite", "chapter 04"),
+)
+conn.commit()      # 不 commit 数据不会保存！`},
+
+{cat:"sqlite", title:"lastrowid 获取自增 id", kw:"新记录 id 主键 返回",
+ desc:"插入后立刻拿到新记录的自增主键，API 返回新记录时必用。",
+ code:`cursor = conn.execute(
+    "INSERT INTO todos (title) VALUES (?)", ("new task",)
+)
+conn.commit()
+new_id = cursor.lastrowid      # 刚插入那条记录的 id`},
+
+{cat:"sqlite", title:"fetchone / fetchall 读取结果", kw:"查询结果 单行 多行 none",
+ desc:"fetchone 返回一行或 None；fetchall 返回列表（可能为空）。",
+ code:`# 单行：判断 None 处理"不存在"
+row = conn.execute(
+    "SELECT * FROM todos WHERE id = ?", (1,)
+).fetchone()
+if row is None:
+    print("not found")
+
+# 多行：遍历列表
+rows = conn.execute("SELECT * FROM todos").fetchall()
+todos = [dict(r) for r in rows]`},
+
+{cat:"sqlite", title:"UPDATE 更新数据", kw:"set where 修改",
+ desc:"一定要写 WHERE！否则整张表都会被修改。",
+ code:`cursor.execute(
+    "UPDATE todos SET title = ?, done = ? WHERE id = ?",
+    ("new title", 1, 5),
+)
+conn.commit()
+print(cursor.rowcount)    # 受影响行数；0 = id 不存在`},
+
+{cat:"sqlite", title:"DELETE 删除数据", kw:"remove 删除 where",
+ desc:"同样必须写 WHERE。rowcount 为 0 说明目标不存在。",
+ code:`cursor.execute("DELETE FROM todos WHERE id = ?", (2,))
+conn.commit()
+if cursor.rowcount == 0:
+    print("id not found")     # API 里此时返回 404`},
+
+{cat:"sqlite", title:"参数化查询（防 SQL 注入）", kw:"injection 安全 占位符 f-string 拼接",
+ desc:"永远用 ? 占位符，禁止用 f-string 拼 SQL——这是安全底线。",
+ code:`# ❌ 危险！恶意输入可以篡改 SQL
+cursor.execute(f"SELECT * FROM todos WHERE title = '{title}'")
+
+# ✅ 正确
+cursor.execute("SELECT * FROM todos WHERE title = ?", (title,))`,
+ tip:"单个参数也必须是元组：(title,) —— 结尾的逗号不能少。"},
+
+{cat:"sqlite", title:"commit 与 rollback（事务）", kw:"transaction 提交 回滚 撤销 事务",
+ desc:"修改先记在\"草稿\"里，commit 才写入文件；出错可 rollback 撤销。",
+ code:`try:
+    conn.execute("UPDATE accounts SET balance = balance - 100 WHERE id = 1")
+    conn.execute("UPDATE accounts SET balance = balance + 100 WHERE id = 2")
+    conn.commit()          # 两步一起生效
+except Exception:
+    conn.rollback()        # 任何一步出错 → 全部撤销
+    raise
+finally:
+    conn.close()`},
+
+{cat:"sqlite", title:"executemany 批量插入", kw:"batch 多条 一次插入",
+ desc:"一次插入多条记录，比循环 execute 简洁。",
+ code:`items = [("task a",), ("task b",), ("task c",)]
+cursor.executemany("INSERT INTO todos (title) VALUES (?)", items)
+conn.commit()`},
+
+{cat:"sqlite", title:"查看数据库里有什么（调试）", kw:"tables pragma schema 表结构 sqlite_master",
+ desc:"列出所有表、查看表结构。",
+ code:`# 列出所有表
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+print(cursor.fetchall())
+
+# 查看表结构
+cursor.execute("PRAGMA table_info(todos)")
+print(cursor.fetchall())`},
+
+{cat:"sqlite", title:"sqlite3 命令行工具", kw:"terminal shell 终端 查看数据 .tables",
+ desc:"macOS 自带，不写 Python 也能直接查看数据库文件。",
+ code:`sqlite3 app.db
+# 进入交互模式后：
+.tables              -- 列出所有表
+.schema todos        -- 查看建表语句
+SELECT * FROM todos;
+.quit                -- 退出`},
+
+/* ── SQL 语句 ─────────────────────────────── */
+{cat:"sql", title:"SELECT 基础查询", kw:"查 读取 select from",
+ desc:"* 表示所有列；也可以只取需要的列。",
+ code:`SELECT * FROM todos;              -- 所有列所有行
+SELECT id, title FROM todos;      -- 只取部分列`},
+
+{cat:"sql", title:"WHERE 条件过滤", kw:"filter 条件 等于 大于",
+ desc:"筛选满足条件的行，支持 = > < >= <= !=。",
+ code:`SELECT * FROM todos WHERE done = 0;
+SELECT * FROM todos WHERE id = 3;
+SELECT * FROM todos WHERE price >= 50;`},
+
+{cat:"sql", title:"AND / OR 多条件", kw:"多个条件 组合 逻辑",
+ desc:"组合多个条件；复杂时用括号明确优先级。",
+ code:`SELECT * FROM todos WHERE done = 0 AND id > 5;
+SELECT * FROM todos WHERE done = 1 OR priority = 5;
+SELECT * FROM todos WHERE done = 0 AND (id > 5 OR title = 'x');`},
+
+{cat:"sql", title:"LIKE 模糊搜索", kw:"search 包含 关键词 %",
+ desc:"% 匹配任意长度字符。搜索功能的基础。",
+ code:`SELECT * FROM todos WHERE title LIKE '%fastapi%';  -- 包含
+SELECT * FROM todos WHERE title LIKE 'learn%';      -- 以 learn 开头
+
+-- Python 里配合参数化：
+cursor.execute("SELECT * FROM todos WHERE title LIKE ?",
+               (f"%{keyword}%",))`},
+
+{cat:"sql", title:"ORDER BY 排序", kw:"sort asc desc 升序 降序",
+ desc:"ASC 升序（默认），DESC 降序。",
+ code:`SELECT * FROM todos ORDER BY id DESC;          -- 最新的在前
+SELECT * FROM todos ORDER BY price ASC, id DESC;  -- 多字段排序`},
+
+{cat:"sql", title:"LIMIT / OFFSET 分页", kw:"pagination 分页 page 条数",
+ desc:"LIMIT 限制条数，OFFSET 跳过前 N 条。第 n 页 = OFFSET (n-1)*size。",
+ code:`SELECT * FROM todos LIMIT 10;              -- 前 10 条
+SELECT * FROM todos LIMIT 10 OFFSET 20;    -- 第 3 页（每页 10 条）
+
+-- Python 参数化：
+cursor.execute("SELECT * FROM todos ORDER BY id LIMIT ? OFFSET ?",
+               (size, (page - 1) * size))`},
+
+{cat:"sql", title:"COUNT 统计数量", kw:"count 总数 统计",
+ desc:"统计行数，常用于分页时算总页数。",
+ code:`SELECT COUNT(*) FROM todos;
+SELECT COUNT(*) FROM todos WHERE done = 1;
+
+-- Python 里取值：
+total = cursor.execute("SELECT COUNT(*) FROM todos").fetchone()[0]`},
+
+{cat:"sql", title:"SQLite 数据类型对照", kw:"type integer text real blob 布尔 boolean",
+ desc:"SQLite 没有布尔类型，用 0/1 代替。",
+ code:`INTEGER   -- 整数     ↔ Python int
+REAL      -- 小数     ↔ Python float
+TEXT      -- 文本     ↔ Python str
+BLOB      -- 二进制   ↔ Python bytes
+-- 布尔：用 INTEGER 的 0/1；Pydantic 的 bool 字段会自动转换`},
+
+{cat:"sql", title:"主键与自增 id", kw:"primary key autoincrement 唯一 编号",
+ desc:"每条记录的唯一编号，插入时自动 +1，不用手动指定。",
+ code:`CREATE TABLE todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL
+);
+-- INSERT 时不写 id，SQLite 自动分配`},
+
+{cat:"sql", title:"NOT NULL 与 DEFAULT 约束", kw:"constraint 必填 默认值 非空",
+ desc:"NOT NULL = 必填；DEFAULT = 不给值时的默认值。",
+ code:`CREATE TABLE todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,                        -- 必填
+    description TEXT DEFAULT '',                -- 默认空串
+    created_at TEXT DEFAULT (datetime('now'))   -- 默认当前时间
+);`},
+
+/* ── 整合实战 ─────────────────────────────── */
+{cat:"integ", title:"项目三文件结构", kw:"structure 组织 architecture 目录",
+ desc:"小项目的标准拆法：改哪类东西去哪个文件。",
+ code:`app/
+├── main.py          # FastAPI 应用 + 路由（接口逻辑）
+├── database.py      # SQLite 连接、建表、get_db 依赖
+└── schemas.py       # Pydantic 请求/响应模型`},
+
+{cat:"integ", title:"get_db 依赖：每请求一个连接", kw:"connection 连接管理 yield depends 线程",
+ desc:"FastAPI + sqlite3 的标准搭配：每个请求独立连接，结束自动关闭。",
+ code:`import sqlite3
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+# 路由里：
+@app.get("/todos")
+def list_todos(db: sqlite3.Connection = Depends(get_db)): ...`,
+ tip:"sqlite3 连接不能跨线程共用，全局共享一个连接会报错。"},
+
+{cat:"integ", title:"启动时建表 init_db", kw:"初始化 startup 建表",
+ desc:"应用启动时调用一次，IF NOT EXISTS 保证幂等。",
+ code:`def init_db() -> None:
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()      # main.py 顶部调用
+app = FastAPI()`},
+
+{cat:"integ", title:"数据库文件用绝对路径", kw:"db_path pathlib __file__ 路径 找不到",
+ desc:"相对路径取决于启动目录，容易连错文件。用 __file__ 定位最稳。",
+ code:`from pathlib import Path
+
+# 数据库放在当前文件的上一级目录
+DB_PATH = Path(__file__).resolve().parent.parent / "todos.db"`},
+
+{cat:"integ", title:"完整示例：GET 列表（带过滤）", kw:"list 查询接口 全部",
+ desc:"支持 ?done=true 过滤，Row 转 dict 后返回。",
+ code:`@app.get("/todos", response_model=list[TodoOut])
+def list_todos(done: bool | None = None, limit: int = 100,
+               db: sqlite3.Connection = Depends(get_db)):
+    if done is None:
+        rows = db.execute(
+            "SELECT * FROM todos ORDER BY id LIMIT ?", (limit,)
+        ).fetchall()
+    else:
+        rows = db.execute(
+            "SELECT * FROM todos WHERE done = ? ORDER BY id LIMIT ?",
+            (int(done), limit),
+        ).fetchall()
+    return [dict(row) for row in rows]`},
+
+{cat:"integ", title:"完整示例：GET 单条 + 404", kw:"detail 详情 单个 not found",
+ desc:"fetchone 返回 None 时抛 404。",
+ code:`@app.get("/todos/{todo_id}", response_model=TodoOut)
+def get_todo(todo_id: int, db: sqlite3.Connection = Depends(get_db)):
+    row = db.execute(
+        "SELECT * FROM todos WHERE id = ?", (todo_id,)
+    ).fetchone()
+    if row is None:
+        raise HTTPException(404, f"todo {todo_id} not found")
+    return dict(row)`},
+
+{cat:"integ", title:"完整示例：POST 新建", kw:"create 插入接口 201 lastrowid",
+ desc:"INSERT → commit → lastrowid → 查回完整记录返回。",
+ code:`@app.post("/todos", response_model=TodoOut, status_code=201)
+def create_todo(todo: TodoCreate,
+                db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.execute(
+        "INSERT INTO todos (title, done) VALUES (?, ?)",
+        (todo.title, int(todo.done)),
+    )
+    db.commit()
+    row = db.execute(
+        "SELECT * FROM todos WHERE id = ?", (cursor.lastrowid,)
+    ).fetchone()
+    return dict(row)`},
+
+{cat:"integ", title:"完整示例：PUT 部分更新", kw:"partial update patch 只改部分字段",
+ desc:"客户端没发的字段（None）保留数据库里的旧值。",
+ code:`@app.put("/todos/{todo_id}", response_model=TodoOut)
+def update_todo(todo_id: int, todo: TodoUpdate,
+                db: sqlite3.Connection = Depends(get_db)):
+    row = db.execute("SELECT * FROM todos WHERE id = ?",
+                     (todo_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, f"todo {todo_id} not found")
+
+    current = dict(row)
+    new_title = todo.title if todo.title is not None else current["title"]
+    new_done = int(todo.done) if todo.done is not None else current["done"]
+
+    db.execute("UPDATE todos SET title = ?, done = ? WHERE id = ?",
+               (new_title, new_done, todo_id))
+    db.commit()
+    row = db.execute("SELECT * FROM todos WHERE id = ?",
+                     (todo_id,)).fetchone()
+    return dict(row)`},
+
+{cat:"integ", title:"完整示例：DELETE + rowcount 判断", kw:"删除接口 204 404",
+ desc:"rowcount 为 0 说明 id 不存在，返回 404。",
+ code:`@app.delete("/todos/{todo_id}", status_code=204)
+def delete_todo(todo_id: int,
+                db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.execute("DELETE FROM todos WHERE id = ?", (todo_id,))
+    db.commit()
+    if cursor.rowcount == 0:
+        raise HTTPException(404, f"todo {todo_id} not found")
+    return None`},
+
+{cat:"integ", title:"数据流转链路（记住这条线）", kw:"流程 json row dict 转换链",
+ desc:"任何 bug 都能定位到链路中的某一环。",
+ code:`写入：前端 JSON → Pydantic 校验 → 参数化 SQL → SQLite 文件
+读取：SQLite 文件 → sqlite3.Row → dict(row)
+      → response_model 校验 → 前端 JSON`},
+
+{cat:"integ", title:"bool 与 0/1 的转换", kw:"boolean true false 布尔 数据库",
+ desc:"SQLite 没有布尔类型：写库用 int() 转，读库 Pydantic 自动转回。",
+ code:`# 写库：True/False → 1/0
+db.execute("INSERT INTO todos (done) VALUES (?)", (int(todo.done),))
+
+# 读库：response_model 的 done: bool 字段自动把 1/0 转回 true/false`},
+
+/* ── Git 版本控制 ─────────────────────────────── */
+{cat:"git", title:"首次使用：配置身份", kw:"config user name email 初始化设置",
+ desc:"提交记录会显示是谁改的，全局配置一次即可。",
+ code:`git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+git --version    # 确认已安装（macOS 自带）`},
+
+{cat:"git", title:"核心工作流 init → add → commit", kw:"提交 保存 快照 基本流程",
+ desc:"日常节奏：改代码 → add → commit。一个小功能一次提交。",
+ code:`git init                      # 当前文件夹变成仓库（只做一次）
+git status                    # 仪表盘：随时看当前状态
+git add .                     # 暂存所有改动
+git commit -m "add todo api"  # 提交快照 + 一句话说明`,
+ tip:"三个区域：工作区 --add--> 暂存区 --commit--> 版本库。"},
+
+{cat:"git", title:"查看历史与差异", kw:"log diff show 记录 对比",
+ desc:"看提交历史、看改了什么。",
+ code:`git log --oneline       # 简洁历史（一行一条）
+git diff                # 工作区 vs 上次提交（还没暂存的改动）
+git diff --staged       # 暂存区 vs 上次提交（即将提交什么）
+git show                # 最近一次提交改了什么`},
+
+{cat:"git", title:".gitignore 忽略文件", kw:"忽略 venv env db pycache 不提交",
+ desc:"虚拟环境、数据库、密钥、缓存不进版本库。仓库根目录建 .gitignore。",
+ code:`# .gitignore
+.venv/
+__pycache__/
+*.pyc
+*.db
+.env          # 密钥文件绝不进 Git！
+.DS_Store`,
+ tip:"只对未跟踪的文件生效。已提交过的先 git rm -r --cached 文件，再提交一次。"},
+
+{cat:"git", title:"分支：创建 / 切换 / 合并", kw:"branch switch merge checkout 实验",
+ desc:"分支 = 平行世界，随便改不影响主线；满意就合并，不满意就删。",
+ code:`git switch -c my-feature    # 创建并切换新分支
+# ...正常 add / commit...
+git switch main             # 切回主分支
+git merge my-feature        # 合并成果
+git branch -d my-feature    # 删掉已合并的分支`},
+
+{cat:"git", title:"撤销操作（后悔药）", kw:"restore reset amend 撤回 恢复 回退",
+ desc:"只要提交过，几乎都找得回来。多提交、小步提交。",
+ code:`git restore main.py           # 丢弃文件的未提交修改（⚠️不可恢复）
+git restore --staged main.py  # 从暂存区取出（内容不变）
+git commit --amend -m "新说明" # 改最近一次提交的说明
+git reset --soft HEAD~1       # 撤销最近一次 commit（改动保留）`,
+ tip:"git reset --hard 会丢弃未提交改动，新手阶段不要用。"},
+
+{cat:"git", title:"推送到 GitHub", kw:"remote push pull clone origin 远程 备份",
+ desc:"GitHub 上建好空仓库后，本地关联并推送。",
+ code:`git remote add origin https://github.com/user/repo.git
+git branch -M main
+git push -u origin main    # 首次推送（-u 记住对应关系）
+
+git push                   # 之后每次推送
+git pull                   # 拉取远程新提交
+git clone https://github.com/user/repo.git   # 克隆仓库`},
+
+{cat:"git", title:"好的 commit message", kw:"提交说明 规范 message 写法",
+ desc:"说清楚「做了什么」，让未来的自己能看懂历史。",
+ code:`# ✅ 好
+git commit -m "add DELETE /todos/{id} endpoint"
+git commit -m "fix: return 404 when todo not found"
+
+# ❌ 差
+git commit -m "update"
+git commit -m "改了点东西"`},
+
+/* ── 日志与调试 ─────────────────────────────── */
+{cat:"logdbg", title:"为什么用 logging 不用 print", kw:"print 区别 日志 为什么",
+ desc:"logging 自带时间/级别/模块名，可全局开关、可写文件、可轮转——print 全都做不到。",
+ code:`# print：上线要删、没时间戳、只能上屏、分不清正常/错误
+# logging：调级别即可全局开关，代码不用动
+
+# 经验法则：临时看一眼用 print（看完就删）；
+# 会运行超过一天的程序，一律 logging`},
+
+{cat:"logdbg", title:"logging 快速上手", kw:"basicconfig getlogger 配置 入门",
+ desc:"入口处 basicConfig 一次；每个模块用 getLogger(__name__) 拿 logger。",
+ code:`import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+logger.info("server started on port 8000")
+logger.warning("disk usage at 85%")`},
+
+{cat:"logdbg", title:"五个日志级别", kw:"debug info warning error critical level 级别",
+ desc:"level=INFO 表示输出 INFO 及以上、屏蔽 DEBUG。开发用 DEBUG，上线用 INFO/WARNING。",
+ code:`logger.debug("查询参数 = ...")     # 开发细节
+logger.info("用户 5 创建了待办")     # 正常关键事件
+logger.warning("重试第 2 次")       # 不正常但能继续
+logger.error("写入数据库失败")      # 某个操作失败
+logger.critical("磁盘满")           # 程序快不行了`},
+
+{cat:"logdbg", title:"输出到文件 + 自动轮转", kw:"rotatingfilehandler 文件 轮转 rotation handler",
+ desc:"日志写文件才能事后排查；轮转限制体积防止撑爆磁盘。",
+ code:`from logging.handlers import RotatingFileHandler
+
+file_handler = RotatingFileHandler(
+    "app.log", maxBytes=1_000_000,   # 单文件最大 1MB
+    backupCount=3, encoding="utf-8", # 保留 3 个旧文件
+)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s - %(message)s",
+    handlers=[file_handler, logging.StreamHandler()],  # 文件+屏幕
+)`,
+ tip:"三件套：logger（入口）→ handler（去哪）→ formatter（长什么样）。"},
+
+{cat:"logdbg", title:"正确记录异常（带堆栈）", kw:"exception exc_info traceback 记录错误",
+ desc:"logger.exception 自动附带完整 traceback；f-string 只记错误信息会丢掉最有价值的堆栈。",
+ code:`# ❌ 只知道出错了，不知道在哪
+except Exception as e:
+    logger.error(f"failed: {e}")
+
+# ✅ 完整堆栈进日志（只能在 except 块里用）
+except Exception:
+    logger.exception("risky_operation failed")`,
+ tip:"密码、API key、token 绝不能出现在日志里。"},
+
+{cat:"logdbg", title:"读懂报错堆栈 traceback", kw:"报错 错误信息 定位 排查",
+ desc:"从下往上读：① 最后一行看错误类型 ② 往上找自己代码中最靠下的一行 = 出错现场 ③ 思考数据从哪来。",
+ code:`Traceback (most recent call last):
+  File "main.py", line 10, in <module>
+    result = process(order)          ← ③ 谁发起的
+  File "main.py", line 2, in calc
+    return item["price"]             ← ② 出错现场
+KeyError: 'price'                    ← ① 先看这里`},
+
+{cat:"logdbg", title:"breakpoint() 断点调试", kw:"pdb debugger 暂停 调试器",
+ desc:"在想暂停的地方写一行 breakpoint()，程序停下进入交互模式，变量随便看。",
+ code:`def calc_total(items):
+    breakpoint()      # ← 程序在这暂停
+    ...
+
+# 常用命令：
+# p 变量名   打印变量        n  下一行
+# s  进入函数内部            c  继续运行
+# l  显示当前代码            q  退出`,
+ tip:"提交代码前全局搜索 breakpoint，别把它带上线。"},
+
+{cat:"logdbg", title:"VSCode 图形化调试", kw:"vscode 断点 红点 f5 f10 f11 变量面板",
+ desc:"行号左侧点红点 → Run and Debug → 停在断点后左侧面板看所有变量。",
+ code:`快捷键：
+F5   继续运行（到下一个断点）
+F10  单步跳过（当前行执行完）
+F11  单步进入（钻进函数内部）
+
+调试 FastAPI：Run and Debug → 选 "Python Debugger: FastAPI"
+底部调试控制台可执行任意表达式，如 len(items)`},
+
+/* ── 配置与工程化 ─────────────────────────────── */
+{cat:"config", title:"读取环境变量", kw:"os environ getenv 环境变量",
+ desc:"配置（会随环境变化的值）与代码分离，环境变量是通用载体。",
+ code:`import os
+
+app_name = os.environ.get("APP_NAME", "My App")  # 带默认值
+api_key = os.environ["API_KEY"]   # 必填：读不到就大声失败`,
+ tip:"环境变量的值永远是字符串！bool(\"False\") == True 是经典坑，用 pydantic-settings 避开。"},
+
+{cat:"config", title:".env 文件 + pydantic-settings", kw:"basesettings 配置文件 dotenv settings",
+ desc:"配置写进 .env，Settings 类自动完成读取+类型转换+校验。优先级：环境变量 > .env > 默认值。",
+ code:`# .env（键=值，不加引号）
+APP_NAME=Todo API
+LOG_LEVEL=DEBUG
+
+# config.py —— pip install pydantic-settings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    app_name: str = "Todo API"
+    log_level: str = "INFO"
+    debug: bool = False        # "true"/"1" 都能正确转 bool
+    model_config = SettingsConfigDict(env_file=".env")
+
+settings = Settings()          # 全项目 import 这一个`},
+
+{cat:"config", title:"密钥安全四纪律", kw:"secret api key 泄露 gitignore env.example 安全",
+ desc:"API key 泄露轻则刷爆账单重则删库。四条纪律必须遵守。",
+ code:`1. .env 写进 .gitignore —— 密钥永不进版本库
+2. 提交 .env.example 模板（只有键名和假值）
+3. 代码/日志/报错里不出现密钥明文
+4. 泄露了立刻去服务商后台吊销重发
+   （从 Git 历史删除是不够的！爬虫几分钟就抓到）`},
+
+{cat:"config", title:"开发/生产配置分离", kw:"environment dev prod 环境区分",
+ desc:"同一份代码，每台机器一份自己的 .env（不进 Git），互不干扰。",
+ code:`# 本地开发机 .env
+LOG_LEVEL=DEBUG
+DEBUG=true
+
+# 生产服务器 .env
+LOG_LEVEL=INFO
+DEBUG=false
+# CORS 也从 * 收紧到具体域名`},
+
+{cat:"config", title:"请求日志中间件", kw:"middleware 中间件 访问日志 耗时 计时",
+ desc:"中间件包在所有路由外面：每个请求记录方法、路径、状态码、耗时。",
+ code:`import time
+
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)      # 交给路由处理
+    ms = (time.perf_counter() - start) * 1000
+    logger.info("%s %s -> %s (%.1fms)",
+        request.method, request.url.path,
+        response.status_code, ms)
+    return response         # 别忘了 return！`},
+
+{cat:"config", title:"全局异常兜底处理器", kw:"exception_handler 500 兜底 堆栈 全局异常",
+ desc:"意外错误：完整堆栈进日志（给你），干净 JSON 给客户端（不泄露内部细节）。",
+ code:`from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request, exc):
+    logger.exception("unhandled error on %s %s",
+                     request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "internal server error"},
+    )`,
+ tip:"HTTPException 有内置处理，不走这个兜底器——它只接漏网之鱼。"},
+
+{cat:"config", title:"lifespan 启动/关闭钩子", kw:"startup shutdown 生命周期 asynccontextmanager 建表",
+ desc:"yield 之前 = 启动时执行（建表/加载）；之后 = 关闭时执行（清理）。",
+ code:`from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()                        # 启动时
+    logger.info("app starting")
+    yield                            # ← 应用在这里运行
+    logger.info("shutting down")     # 关闭时（Ctrl+C）
+
+app = FastAPI(lifespan=lifespan)`},
+
+{cat:"config", title:"BackgroundTasks 后台任务", kw:"background 异步任务 不等待 邮件",
+ desc:"必须做但用户不用等的工作（发邮件/慢接口）：立即返回响应，任务在响应之后执行。",
+ code:`from fastapi import BackgroundTasks
+
+@app.post("/users", status_code=201)
+def create_user(email: str, background_tasks: BackgroundTasks):
+    # ...保存用户（这个必须等）...
+    background_tasks.add_task(send_welcome_email, email)
+    return {"message": "created"}    # 立即返回`,
+ tip:"任务失败会丢（进程重启就没了）。必达任务用专业队列（Celery/arq）。"},
+
+{cat:"config", title:"uvicorn 日志 vs 你的日志", kw:"access log 访问日志 no-access-log 重复",
+ desc:"uvicorn 自带访问日志（格式固定、无耗时）；你的中间件日志可自由控制。两者并存或关掉一个。",
+ code:`INFO:  127.0.0.1 - "GET /todos" 200 OK   ← uvicorn 的
+2026.. INFO app.main - GET /todos -> 200 (3.2ms) ← 你的
+
+# 只留自己的：
+uvicorn main:app --no-access-log`},
+
+/* ── 部署 ─────────────────────────────── */
+{cat:"deploy", title:"生产模式启动命令", kw:"production workers host 0.0.0.0 上线",
+ desc:"去掉 --reload；0.0.0.0 允许外部访问；workers 按 CPU 核数（SQLite 项目保持 1）。",
+ code:`# 开发
+uvicorn main:app --reload
+
+# 生产
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4`,
+ tip:"多 worker 同时写 SQLite 会 database is locked——学习项目 workers=1 足够。"},
+
+{cat:"deploy", title:"局域网访问（手机联调）", kw:"手机 局域网 ip 访问 测试",
+ desc:"监听 0.0.0.0 后，同一 Wi-Fi 的设备可通过你电脑的 IP 访问。",
+ code:`uvicorn main:app --host 0.0.0.0 --port 8000
+
+# 查本机 IP（macOS）：
+ipconfig getifaddr en0
+# 手机浏览器打开 http://<你的IP>:8000/docs`},
+
+{cat:"deploy", title:"进程守护 systemd（概念）", kw:"daemon 守护 常驻 自启 restart",
+ desc:"生产服务由守护系统管理：开机自启、崩溃自动拉起——而不是一个开着的终端。",
+ code:`# /etc/systemd/system/todo-api.service
+[Service]
+WorkingDirectory=/srv/todo-api/app
+EnvironmentFile=/srv/todo-api/.env
+ExecStart=/srv/.venv/bin/uvicorn main:app --host 0.0.0.0
+Restart=always        # ← 崩溃自动重启
+
+# systemctl start todo-api / enable / status
+# journalctl -u todo-api -f     实时看日志`},
+
+{cat:"deploy", title:"最小 Dockerfile", kw:"docker 容器 镜像 打包",
+ desc:"把「代码+依赖+运行环境」打包成镜像，任何机器行为一致。菜谱=Dockerfile，便当=镜像，开吃=容器。",
+ code:`FROM python:3.12-slim
+WORKDIR /code
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app/ ./app/
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]`,
+ tip:"配 .dockerignore（.venv/、*.db、.env）防止垃圾进镜像。容器里必须监听 0.0.0.0。"},
+
+{cat:"deploy", title:"docker 构建与运行", kw:"build run ps logs stop 命令",
+ desc:"构建镜像、运行容器、日常管理。",
+ code:`docker build -t todo-api .            # 构建镜像
+docker run -p 8000:8000 todo-api      # 运行（本机8000→容器8000）
+docker run -d --env-file .env -p 8000:8000 todo-api  # 后台+注入配置
+
+docker ps            # 运行中的容器
+docker logs <ID>     # 看日志
+docker stop <ID>     # 停止`,
+ tip:"容器删除时里面写的文件（如 SQLite）一起消失——持久化要挂载卷 -v。"},
+
+{cat:"deploy", title:"反向代理与 HTTPS（架构图）", kw:"nginx caddy https 证书 架构",
+ desc:"用户不直接连 uvicorn：Nginx 在前面负责 HTTPS 证书、静态文件、转发。",
+ code:`用户浏览器
+   │ https://api.example.com (443, 加密)
+   ▼
+Nginx / Caddy（反向代理）
+   │ http://127.0.0.1:8000
+   ▼
+uvicorn（只监听本机，不暴露公网）
+
+# 证书：Let's Encrypt 免费签发（Caddy 全自动）
+# 个人项目更省心：Railway / Render / Fly.io 连仓库即部署`},
+
+{cat:"deploy", title:"上线前检查清单", kw:"checklist 检查 上线 发布",
+ desc:"每次部署前过一遍。",
+ code:`□ 去掉 --reload；workers 按需（SQLite 保持 1）
+□ LOG_LEVEL 调到 INFO；日志写文件+轮转
+□ CORS 从 * 收紧到具体域名
+□ 密钥全部走环境变量/.env，仓库无明文
+□ 全局异常兜底就位，用户看不到堆栈
+□ 数据库有备份策略
+□ 杀掉进程能自动恢复（守护/容器重启策略）
+□ （可选）生产关闭 /docs：FastAPI(docs_url=None)`},
+
+/* ── 测试与调试 ─────────────────────────────── */
+{cat:"test", title:"curl 测试接口模板", kw:"命令行 测试 请求 http",
+ desc:"四种方法的 curl 写法，URL 带 ? 时必须加引号。",
+ code:`# GET（格式化输出）
+curl -s "http://127.0.0.1:8000/todos" | python3 -m json.tool
+
+# POST 发送 JSON
+curl -s -X POST "http://127.0.0.1:8000/todos" \\
+  -H "Content-Type: application/json" \\
+  -d '{"title": "test"}'
+
+# PUT
+curl -s -X PUT "http://127.0.0.1:8000/todos/1" \\
+  -H "Content-Type: application/json" -d '{"done": true}'
+
+# DELETE（-i 显示状态码）
+curl -s -i -X DELETE "http://127.0.0.1:8000/todos/1"`},
+
+{cat:"test", title:"TestClient 自动化测试", kw:"pytest 单元测试 assert testclient",
+ desc:"不启动 uvicorn，直接在内存里调用应用。需要 pip install pytest httpx。",
+ code:`# test_main.py（文件名必须 test_ 开头）
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
+
+def test_create_todo():
+    response = client.post("/todos", json={"title": "test"})
+    assert response.status_code == 201
+    assert response.json()["title"] == "test"
+
+def test_missing_returns_404():
+    assert client.get("/todos/999999").status_code == 404`},
+
+{cat:"test", title:"运行 pytest", kw:"run test 跑测试",
+ desc:"自动发现所有 test_*.py 里的 test_* 函数。",
+ code:`pytest              # 全部运行
+pytest -v           # 显示每个测试名字
+pytest -k delete    # 只运行名字含 delete 的测试`},
+
+{cat:"test", title:"只看响应状态码", kw:"http_code status 检查",
+ desc:"脚本里检查接口是否正常的常用技巧。",
+ code:`curl -s -o /dev/null -w "%{http_code}\\n" "http://127.0.0.1:8000/todos"
+# 输出：200`},
+
+{cat:"test", title:"打印调试 SQL 实际执行了什么", kw:"debug trace 调试 日志",
+ desc:"给连接挂一个回调，打印每条实际执行的 SQL。",
+ code:`conn = sqlite3.connect("app.db")
+conn.set_trace_callback(print)     # 之后每条 SQL 都会打印出来`},
+
+/* ── 常见错误 ─────────────────────────────── */
+{cat:"errors", title:"ModuleNotFoundError: No module named 'fastapi'", kw:"找不到模块 导入失败",
+ desc:"虚拟环境没激活，或者没在这个环境里装过包。",
+ code:`source .venv/bin/activate
+pip install fastapi uvicorn
+pip list        # 确认装上了`},
+
+{cat:"errors", title:"Error loading ASGI app: Could not import module \"main\"", kw:"uvicorn 启动失败 导入",
+ desc:"uvicorn 在错误的文件夹里执行了——它按相对路径找 main.py。",
+ code:`cd path/to/your/app     # 先进入 main.py 所在文件夹
+uvicorn main:app --reload`},
+
+{cat:"errors", title:"404 Not Found / 405 Method Not Allowed", kw:"接口不存在 方法不对",
+ desc:"404 = 路径没有对应路由；405 = 路径对了但 HTTP 方法不对。",
+ code:`# 排查步骤：
+# 1. 打开 /docs 查看已注册的路由和方法
+# 2. 检查路径拼写（/todos 和 /todo 不是一回事）
+# 3. 检查前端 fetch 的 method 是否和路由装饰器一致`},
+
+{cat:"errors", title:"422 Unprocessable Entity", kw:"校验失败 参数错误 detail",
+ desc:"参数类型不符或缺少必填字段。响应的 detail 会精确说明。",
+ code:`# 读响应体里的 detail：
+# "loc": ["body", "title"] → 请求体的 title 字段有问题
+# "msg": 具体原因（缺失 / 太短 / 类型不对……）
+# 常见原因：前端忘了 Content-Type: application/json 头`},
+
+{cat:"errors", title:"sqlite3.OperationalError: no such table", kw:"表不存在 找不到表",
+ desc:"表没建，或者连到了另一个位置的 db 文件。",
+ code:`# 1. 确认 init_db() 在应用启动时被调用
+# 2. 打印确认实际用的数据库文件路径：
+print(DB_PATH)
+# 3. 用绝对路径（__file__ 定位）代替相对路径`},
+
+{cat:"errors", title:"数据没保存 / 重启后消失", kw:"丢失 commit 忘记提交",
+ desc:"INSERT / UPDATE / DELETE 之后忘了 commit。",
+ code:`db.execute("INSERT INTO todos (title) VALUES (?)", ("x",))
+db.commit()     # ← 必须有这行，否则修改只在内存里`},
+
+{cat:"errors", title:"SQLite objects created in a thread...", kw:"thread 线程 报错 共享连接",
+ desc:"全局共享了一个 sqlite3 连接。FastAPI 是多线程处理请求的。",
+ code:`# ❌ 全局一个连接
+conn = sqlite3.connect("app.db")
+
+# ✅ 用依赖注入，每个请求一个新连接
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        yield conn
+    finally:
+        conn.close()`},
+
+{cat:"errors", title:"浏览器报 CORS 错误", kw:"blocked by cors policy 跨域拦截 fetch 失败",
+ desc:"前端和后端不同来源，后端没声明允许跨域。",
+ code:`from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+)`,
+ tip:"另一种解法：让 FastAPI 直接托管前端页面（StaticFiles），同源就没有 CORS 问题。"},
+
+{cat:"errors", title:"返回 200 但内容是奇怪的对象", kw:"httpexception return raise 错误用法",
+ desc:"把 HTTPException 用 return 返回了。必须用 raise。",
+ code:`# ❌ 错误
+return HTTPException(status_code=404, detail="not found")
+
+# ✅ 正确
+raise HTTPException(status_code=404, detail="not found")`},
+
+{cat:"errors", title:"端口被占用 Address already in use", kw:"port 8000 占用",
+ desc:"上一个服务器进程还没关。",
+ code:`# 方法 1：找到旧终端按 Ctrl+C
+# 方法 2：换端口
+uvicorn main:app --reload --port 8001
+# 方法 3：找到并结束占用进程
+lsof -i :8000
+kill <PID>`},
+
+{cat:"errors", title:"Incorrect number of bindings supplied", kw:"占位符 参数个数 元组",
+ desc:"? 的个数和参数元组长度不一致，最常见是单参数忘了逗号。",
+ code:`# ❌ ("x") 只是字符串，不是元组
+cursor.execute("... WHERE title = ?", ("x"))
+
+# ✅ 单元素元组要有逗号
+cursor.execute("... WHERE title = ?", ("x",))`},
+
+{cat:"errors", title:"改了代码没生效", kw:"reload 重启 缓存",
+ desc:"启动时没加 --reload，或者浏览器缓存了旧响应。",
+ code:`uvicorn main:app --reload    # 开发时始终带 --reload
+# 浏览器强制刷新：Cmd + Shift + R`},
+
+/* ── AI Agent 开发 ─────────────────────────────── */
+{cat:"agent", title:"什么是 Agent？", kw:"agent 智能体 定义 概念 workflow 工作流",
+ desc:"Agent = LLM（思考）+ 工具（动手）+ 循环（编排）。判断标准：下一步做什么由模型自主决定（Agent），还是代码写死（工作流）。",
+ code:`用户任务
+   │
+   ▼
+┌─────────── Agent 循环 ───────────┐
+│ LLM 思考: 下一步做什么？          │
+│   ├─ 需要工具 → 调用工具 → 结果喂回 ──┐
+│   └─ 任务完成 → 输出最终回答          │
+└──────────────◀───────────────────┘`,
+ tip:"不是所有任务都要 Agent：单次问答用一次调用；流程固定用工作流；步骤无法预知才用 Agent。"},
+
+{cat:"agent", title:"Claude API 基本调用", kw:"anthropic sdk messages create llm 大模型调用",
+ desc:"官方 Python SDK 的最小调用。API key 放环境变量 ANTHROPIC_API_KEY。",
+ code:`# pip install anthropic
+import anthropic
+
+client = anthropic.Anthropic()   # 自动读环境变量里的 key
+
+response = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=16000,
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+for block in response.content:
+    if block.type == "text":
+        print(block.text)`},
+
+{cat:"agent", title:"Tool Use：定义工具", kw:"function calling 工具调用 json schema 声明",
+ desc:"用 JSON Schema 声明工具的名字、功能、参数。description 决定模型何时使用它——写清楚使用时机。",
+ code:`tools = [{
+    "name": "get_weather",
+    "description": "Get current weather for a location",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "location": {"type": "string", "description": "City name"},
+        },
+        "required": ["location"],
+    },
+}]`,
+ tip:"LLM 本身不执行任何代码——它只输出「我想调用 XX，参数 YY」，真正执行的是你的代码。"},
+
+{cat:"agent", title:"手写 Agent 循环（核心模式）", kw:"agentic loop tool_use stop_reason 循环 while",
+ desc:"一切 Agent 框架的本质：模型请求工具 → 执行 → 结果喂回 → 继续，直到 stop_reason 不再是 tool_use。",
+ code:`messages = [{"role": "user", "content": "What's the weather in Paris?"}]
+
+while True:
+    response = client.messages.create(
+        model="claude-opus-4-8", max_tokens=16000,
+        tools=tools, messages=messages,
+    )
+    if response.stop_reason != "tool_use":
+        break                                    # 模型回答完了
+
+    messages.append({"role": "assistant", "content": response.content})
+    tool_results = []
+    for block in response.content:
+        if block.type == "tool_use":
+            result = run_tool(block.name, block.input)   # 你来执行
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": block.id,          # id 必须对应
+                "content": result,
+            })
+    messages.append({"role": "user", "content": tool_results})`},
+
+{cat:"agent", title:"Tool Runner：SDK 自动跑循环", kw:"beta_tool tool_runner 装饰器 自动执行",
+ desc:"用 @beta_tool 装饰器定义工具（schema 从函数签名自动生成），循环交给 SDK。",
+ code:`from anthropic import beta_tool
+
+@beta_tool
+def get_weather(location: str) -> str:
+    """Get current weather for a location.
+
+    Args:
+        location: City name, e.g. Paris.
+    """
+    return f"Sunny, 22°C in {location}"
+
+runner = client.beta.messages.tool_runner(
+    model="claude-opus-4-8", max_tokens=16000,
+    tools=[get_weather],
+    messages=[{"role": "user", "content": "Weather in Paris?"}],
+)
+for message in runner:      # 自动执行工具直到完成
+    print(message)`},
+
+{cat:"agent", title:"System Prompt 系统提示词", kw:"system 角色设定 人设 指令",
+ desc:"定义模型的角色、行为规范。和 user 消息分开，是给模型的「岗位说明书」。",
+ code:`response = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=16000,
+    system="You are a helpful coding assistant. Always answer in Chinese.",
+    messages=[{"role": "user", "content": "How do I read a JSON file?"}],
+)`},
+
+{cat:"agent", title:"多轮对话：API 是无状态的", kw:"multi-turn conversation history 上下文 记忆 stateless",
+ desc:"API 不记得上一次对话——每次都要把完整历史发过去。「记忆」是你的代码维护的消息列表。",
+ code:`messages = [
+    {"role": "user", "content": "My name is Alice."},
+    {"role": "assistant", "content": "Hello Alice!"},
+    {"role": "user", "content": "What's my name?"},   # 模型能答对，
+]                                                      # 因为历史都发过去了
+response = client.messages.create(
+    model="claude-opus-4-8", max_tokens=16000, messages=messages,
+)`},
+
+{cat:"agent", title:"什么是 MCP？", kw:"model context protocol 协议 标准 连接 集成",
+ desc:"MCP（Model Context Protocol）是把「工具/数据源接入 Agent」标准化的开放协议——像 USB 一样即插即用，解决每个应用×每个服务都要单独写对接的 M×N 问题。",
+ code:`没有 MCP:  每个 App × 每个服务 = 单独写对接（M×N 份代码）
+
+有了 MCP:
+  Agent 应用 ──(MCP 协议)──▶ GitHub MCP Server（官方维护）
+            ──(MCP 协议)──▶ Slack MCP Server
+            ──(MCP 协议)──▶ 你自己写的 MCP Server`,
+ tip:"MCP Server = 提供工具的一方；MCP Client = 使用工具的 Agent 应用（如 Claude Code）。"},
+
+{cat:"agent", title:"在 API 中使用远程 MCP Server", kw:"mcp_servers mcp_toolset 远程 连接服务",
+ desc:"声明 Server 地址 + 授权模型使用它的工具集，两者必须成对出现。连接由 API 服务端完成。",
+ code:`response = client.beta.messages.create(
+    model="claude-opus-4-8", max_tokens=16000,
+    betas=["mcp-client-2025-11-20"],
+    mcp_servers=[{
+        "type": "url",
+        "url": "https://example.com/mcp",
+        "name": "example-mcp",
+    }],
+    tools=[{"type": "mcp_toolset", "mcp_server_name": "example-mcp"}],
+    messages=[{"role": "user", "content": "Use the available tools"}],
+)`},
+
+{cat:"agent", title:"自己写一个 MCP Server", kw:"fastmcp server 开发 暴露接口",
+ desc:"把你的服务（如 FastAPI 后端、SQLite 数据）暴露给任意 Agent 使用。写法风格和 FastAPI 很像。",
+ code:`# pip install "mcp[cli]"
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("my-todos")
+
+@mcp.tool()
+def list_todos() -> list[dict]:
+    """List all todo items from the database."""
+    ...   # 这里可以查询你的 SQLite
+
+if __name__ == "__main__":
+    mcp.run()`},
+
+{cat:"agent", title:"什么是 Skill？", kw:"skill 技能 知识包 skill.md 手册",
+ desc:"Skill = 一个装着某类任务「操作手册」的文件夹（指令+脚本+资料），Agent 遇到相关任务时按需加载。",
+ code:`my-skill/
+├── SKILL.md          # 必需：元数据 + 指令
+├── references/       # 可选：参考资料
+└── scripts/          # 可选：配套脚本
+
+# SKILL.md 开头的元数据：
+---
+name: sql-report
+description: 当用户要求生成数据库统计报表时使用。
+---`,
+ tip:"三者类比：Tool = 给 Agent 一把螺丝刀；MCP = 统一的 USB 接口；Skill = 一本维修手册。"},
+
+{cat:"agent", title:"Skill 的渐进式加载", kw:"progressive disclosure 上下文 按需加载 context",
+ desc:"平时只有 description 一行占用上下文；模型判断任务相关时才读取完整内容。因此可挂载几十个 Skill 不撑爆上下文窗口。",
+ code:`模型的常驻上下文：
+  skill A: "生成数据库报表时使用"     ← 只有这一行
+  skill B: "处理 Excel 文件时使用"    ← 只有这一行
+  ...
+
+用户: "帮我做个销售统计报表"
+  → 模型判断 skill A 相关 → 读取完整 SKILL.md → 按手册执行`},
+
+{cat:"agent", title:"LangChain 是什么 + 安装", kw:"langchain 框架 编排 第三方",
+ desc:"最流行的第三方 LLM 应用开发框架：统一模型接口、提示词模板、链式编排、RAG 组件。",
+ code:`pip install langchain langchain-anthropic
+
+# 基本调用
+from langchain_anthropic import ChatAnthropic
+
+model = ChatAnthropic(model="claude-opus-4-8")
+response = model.invoke("What is the capital of France?")
+print(response.content)    # Paris`},
+
+{cat:"agent", title:"LangChain LCEL：用 | 串成链", kw:"lcel chain pipe 管道 prompt template 模板",
+ desc:"核心语法：提示词模板 | 模型 | 输出解析器，数据从左往右流。",
+ code:`from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_anthropic import ChatAnthropic
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a translator. Translate to {language}."),
+    ("user", "{text}"),
+])
+model = ChatAnthropic(model="claude-opus-4-8")
+
+chain = prompt | model | StrOutputParser()    # ★ 链
+
+result = chain.invoke({"language": "French", "text": "Good morning!"})
+print(result)    # Bonjour !`,
+ tip:"chain.invoke() 单次执行；chain.stream() 流式；chain.batch() 批量。"},
+
+{cat:"agent", title:"LangChain 定义工具 @tool", kw:"bind_tools tool 装饰器 绑定",
+ desc:"@tool 装饰器定义工具（docstring 就是描述），bind_tools 让模型知道它的存在。",
+ code:`from langchain_core.tools import tool
+
+@tool
+def get_weather(location: str) -> str:
+    """Get current weather for a location."""
+    return f"Sunny, 22°C in {location}"
+
+model_with_tools = model.bind_tools([get_weather])
+response = model_with_tools.invoke("Weather in Paris?")
+print(response.tool_calls)
+# [{'name': 'get_weather', 'args': {'location': 'Paris'}, ...}]`,
+ tip:"bind_tools 只让模型「输出」调用请求；真正执行和循环要自己写，或交给 LangGraph。"},
+
+{cat:"agent", title:"LangGraph 是什么？", kw:"langgraph 状态图 state graph node edge 节点",
+ desc:"LangChain 团队的 Agent 编排框架，把 Agent 建模为状态图：State（共享数据）+ Node（处理步骤）+ Edge（走向，可条件分支）。",
+ code:`pip install langgraph langchain-anthropic
+
+# LangChain 的链是单向直线：A → B → C
+# LangGraph 的图可以分支、循环、回退：
+#          ┌──────────┐
+#   START → 模型节点 ⇄ 工具节点     ← 这就是 Agent 循环
+#          └→ END（模型不再要工具时）`,
+ tip:"进阶价值：内置 checkpoint 状态持久化、human-in-the-loop 人工审批、多 Agent 协作。"},
+
+{cat:"agent", title:"LangGraph 预置 ReAct Agent", kw:"create_react_agent prebuilt 快速创建",
+ desc:"一行创建完整 Agent（含工具执行和循环）——手写循环的图版本。",
+ code:`from langgraph.prebuilt import create_react_agent
+from langchain_anthropic import ChatAnthropic
+from langchain_core.tools import tool
+
+@tool
+def get_weather(location: str) -> str:
+    """Get current weather for a location."""
+    return f"Sunny, 22°C in {location}"
+
+model = ChatAnthropic(model="claude-opus-4-8")
+agent = create_react_agent(model, tools=[get_weather])
+
+result = agent.invoke({"messages": [("user", "Weather in Paris?")]})
+print(result["messages"][-1].content)`},
+
+{cat:"agent", title:"LangGraph 手动构图", kw:"stategraph add_node add_edge compile typeddict",
+ desc:"State 定义共享数据；节点是普通函数（返回要更新的字段）；add_edge 连接走向。",
+ code:`from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+
+class State(TypedDict):
+    text: str
+    word_count: int
+
+def count_words(state: State) -> dict:
+    return {"word_count": len(state["text"].split())}   # 返回更新
+
+graph = StateGraph(State)
+graph.add_node("count", count_words)
+graph.add_edge(START, "count")
+graph.add_edge("count", END)
+
+app = graph.compile()
+app.invoke({"text": "hello world", "word_count": 0})`},
+
+{cat:"agent", title:"LangGraph 条件边（图的 if 语句）", kw:"conditional edges 分支 路由 循环",
+ desc:"根据状态决定下一步走哪个节点——Agent 循环和分支判断靠它实现。",
+ code:`def should_continue(state: State) -> str:
+    """路由函数：返回下一个节点的名字。"""
+    if state["word_count"] > 3:
+        return "report"     # 走 report 节点
+    return END              # 直接结束
+
+graph.add_conditional_edges("count", should_continue)`},
+
+{cat:"agent", title:"Agent 技术选型速查", kw:"选择 对比 框架选型 什么时候用",
+ desc:"从简单到复杂：官方 SDK → LangChain → LangGraph。不确定时从最简单的开始。",
+ code:`学习原理 / 简单应用      → 官方 anthropic SDK（手写循环）
+固定流程管道（翻译→摘要）  → LangChain LCEL
+复杂 Agent（循环/审批/多Agent）→ LangGraph
+接第三方服务（GitHub/Slack）  → MCP（用现成 Server）
+教 Agent 领域规范          → Skill（按需加载知识）`,
+ tip:"初学路线：先弄懂手写循环（内功）→ 再学 create_react_agent（工程实践）→ MCP/Skill 用时查文档。"},
+
+{cat:"agent", title:"Agent 常见错误", kw:"401 死循环 token 工具不调用 排错",
+ desc:"Agent 开发最常踩的几个坑。",
+ code:`# 401 AuthenticationError → API key 没设置
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# 模型不调用工具 → description 写清楚"什么时候该用"
+
+# 死循环烧 token → 循环加最大轮数限制：
+for _ in range(10):   # 而不是 while True
+    ...
+
+# 并行工具调用报错 → 所有 tool_result 必须
+# 放在同一条 user 消息里，不能拆开`},
+];
+
+/* ── 渲染 ─────────────────────────────── */
+const nav = document.getElementById("nav");
+const list = document.getElementById("list");
+const search = document.getElementById("search");
+const countEl = document.getElementById("count");
+let activeCat = "all";
+
+function buildNav() {
+  nav.innerHTML = "";
+  for (const [key, label] of Object.entries(CATS)) {
+    const n = key === "all" ? DATA.length : DATA.filter(d => d.cat === key).length;
+    const btn = document.createElement("button");
+    btn.innerHTML = `${label}<span class="n">${n}</span>`;
+    btn.className = key === activeCat ? "active" : "";
+    btn.onclick = () => { activeCat = key; buildNav(); render(); };
+    nav.appendChild(btn);
+  }
+}
+
+function matches(item, q) {
+  if (!q) return true;
+  const hay = (item.title + " " + item.desc + " " + (item.kw || "") + " "
+             + (item.tip || "") + " " + item.code + " " + CATS[item.cat]).toLowerCase();
+  return q.toLowerCase().split(/\s+/).every(term => hay.includes(term));
+}
+
+function render() {
+  const q = search.value.trim();
+  const shown = DATA.filter(d =>
+    (activeCat === "all" || d.cat === activeCat) && matches(d, q));
+
+  list.innerHTML = "";
+  countEl.textContent = `${shown.length} / ${DATA.length} 条`;
+
+  if (shown.length === 0) {
+    list.innerHTML = `<div class="empty">没有匹配的条目。<br>试试更短的关键词，或切换到「全部」分类。</div>`;
+    return;
+  }
+
+  for (const item of shown) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = item.title;
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = CATS[item.cat];
+    h3.appendChild(badge);
+    card.appendChild(h3);
+
+    const p = document.createElement("p");
+    p.className = "desc";
+    p.textContent = item.desc;
+    card.appendChild(p);
+
+    const wrap = document.createElement("div");
+    wrap.className = "codewrap";
+    const pre = document.createElement("pre");
+    const code = document.createElement("code");
+    code.textContent = item.code;          // textContent 自动安全转义
+    pre.appendChild(code);
+    const btn = document.createElement("button");
+    btn.className = "copy";
+    btn.textContent = "复制";
+    btn.onclick = () => {
+      navigator.clipboard.writeText(item.code).then(() => {
+        btn.textContent = "已复制 ✓";
+        setTimeout(() => (btn.textContent = "复制"), 1500);
+      });
+    };
+    wrap.appendChild(pre);
+    wrap.appendChild(btn);
+    card.appendChild(wrap);
+
+    if (item.tip) {
+      const tip = document.createElement("div");
+      tip.className = "tip";
+      tip.textContent = "💡 " + item.tip;
+      card.appendChild(tip);
+    }
+    list.appendChild(card);
+  }
+}
+
+search.addEventListener("input", render);
+buildNav();
+render();
+</script>
+</body>
+</html>
