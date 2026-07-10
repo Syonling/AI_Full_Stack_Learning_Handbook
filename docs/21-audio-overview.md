@@ -3,7 +3,8 @@
 > 「项目实践」开篇。从这章起，我们把前 20 章的能力组装成一个真实产品：
 > **AudioBook 音频工作台**——上传/录音/AI 合成音频素材，管理它们，最终在时间轴上编排成作品。
 > 本章不写多少代码，但做出的每个决策都决定后面四章怎么走。预计学习时间：2~3 小时。
-> 前置：后端主线（04~07）+ 前端 13~16。完全没接触过音频？正好，第 1 节就是为你写的。
+> 前置：后端主线（04~07）+ 前端 13~16 + **18 章**（本项目前端用模块化写法组织，需要 18 章的
+> ES Modules 和本地服务器知识）。完全没接触过音频？正好，第 1 节就是为你写的。
 
 ---
 
@@ -184,32 +185,181 @@ pip install python-multipart mutagen edge-tts
 
 ## 7. 项目骨架与五章路线
 
-目录结构直接套 20 章的分层模板：
+### 7.1 目录结构（直接套 20 章的分层模板）
 
 ```
 audiobook/
 ├── requirements.txt
 ├── .env.example
-├── uploads/              # 音频文件本体（.gitignore 掉！）
+├── uploads/              # 音频文件本体（.gitignore 掉，留 .gitkeep 占位）
 ├── app/
-│   ├── main.py           # 组装 + StaticFiles 挂载
+│   ├── __init__.py
+│   ├── main.py           # 组装 + StaticFiles 挂载 + CORS
 │   ├── core/config.py    # 08 章的 Settings（上传大小限制等）
-│   ├── db/database.py    # 05/07 章 + PRAGMA foreign_keys
+│   ├── db/database.py    # ↓ 7.2 给出完整版
 │   ├── schemas/          # audio.py / clip.py
 │   └── routers/          # audios.py / synthesize.py / timeline.py
 └── frontend/
-    ├── index.html
+    ├── index.html        # ↓ 7.3 给出完整骨架
     ├── css/              # 18 章分层 + 19 章 Apple 风令牌
-    └── js/               # api.js / player.js / upload.js / timeline.js
+    └── js/               # utils.js / api.js / player.js / library.js /
+                          # upload.js / recorder.js / synthesize.js /
+                          # timeline.js / scheduler.js（各章逐个填充）
 ```
+
+### 7.2 database.py 完整版（后面四章直接引用，抄这里）
+
+```python
+# app/db/database.py
+import sqlite3
+from pathlib import Path
+
+DB_PATH = Path(__file__).resolve().parent.parent.parent / "audiobook.db"
+
+
+def connect() -> sqlite3.Connection:
+    """开一个新连接（后台任务等场景自己开自己关，24 章会用到）。"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")    # 每个连接都要打开外键检查
+    return conn
+
+
+def get_db():
+    """FastAPI 依赖：每个请求一个连接（07 章的老朋友 + 外键开关）。"""
+    conn = connect()
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+
+def init_db() -> None:
+    conn = connect()
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS audios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            display_name TEXT NOT NULL,
+            duration REAL NOT NULL,
+            size_bytes INTEGER NOT NULL,
+            source TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'ready',
+            created_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE TABLE IF NOT EXISTS clips (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            audio_id INTEGER NOT NULL REFERENCES audios(id),
+            track INTEGER NOT NULL DEFAULT 0,
+            start_seconds REAL NOT NULL,
+            duration REAL NOT NULL
+        );
+    """)
+    conn.commit()
+    conn.close()
+```
+
+（`status` 列本是 24 章才需要的，建表时一步到位，免得中途 ALTER。）
+
+### 7.3 index.html 页面骨架（四个功能区一次搭好，后面各章往里填）
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioBook 工作台</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="js/main.js" type="module" defer></script>
+</head>
+<body>
+    <main class="container">
+        <h1>AudioBook 工作台</h1>
+
+        <section id="section-synthesize">      <!-- 24 章：AI 合成表单 -->
+            <h2>AI 合成</h2>
+        </section>
+
+        <section id="section-upload">           <!-- 23 章：上传区 + 录音按钮 -->
+            <h2>添加素材</h2>
+        </section>
+
+        <section id="section-library">          <!-- 23 章：素材列表 -->
+            <h2>素材库</h2>
+            <ul id="library"></ul>
+        </section>
+
+        <section id="section-player">           <!-- 22 章：播放器 -->
+            <h2>试听</h2>
+        </section>
+
+        <section id="section-timeline">         <!-- 25 章：时间轴 -->
+            <h2>时间轴</h2>
+        </section>
+    </main>
+</body>
+</html>
+```
+
+每章的 HTML 片段（播放器、drop-zone、时间轴……）就填进对应的 `<section>` 里；
+`js/main.js` 作为入口 `import` 各功能模块（18 章的组织方式）。
+
+### 7.4 怎么跑起来（每次开发的固定动作，两个终端）
+
+```bash
+# 终端 1：后端（在 audiobook/ 根目录）
+source .venv/bin/activate
+uvicorn app.main:app --reload          # 包结构启动方式，20 章讲过
+
+# 终端 2：前端（在 audiobook/frontend/ 目录）
+python3 -m http.server 3000
+# 浏览器访问 http://localhost:3000
+```
+
+**为什么前端必须起服务器、不能双击打开？** 因为 js/ 用了 `import/export` 模块化
+（18 章讲过 file:// 下会被浏览器拒绝）。
+
+**因此 CORS 必须配置**（前端在 3000，API 在 8000，是跨域）——main.py 里照 06 章加上：
+
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],   # 比 demo 的 "*" 收紧一步
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+### 7.5 五章里程碑
 
 | 里程碑 | 章节 | 验收标准 |
 |---|---|---|
-| M1 骨架 + 表 | 本章练习 | 服务启动，两张表建好，uploads/ 就位 |
+| M1 骨架 + 表 | 本章练习 | 两个终端都能跑起来，空页面五个区块可见，两张表建好 |
 | M2 能播 | 22 | 手放一个 mp3 进 uploads，网页上有完整播放器能播、能拖进度 |
 | M3 能传能录 | 23 | 上传/录音进素材库，列表可见可删 |
 | M4 能合成 | 24 | 输入文字 → 素材库多出一条 AI 语音 |
 | M5 能编排 | 25 | 拖块 → 保存 → 刷新还在 → 串播整条时间轴 |
+
+---
+
+## 8. 卡住了怎么办（本项目的自救手册）
+
+纯文档跟做，卡住是正常的。按这个顺序自救，90% 的问题到第 3 步就解决了：
+
+1. **退级**：回到上一个里程碑，确认它还是好的（比如 M3 卡住 → 先验证 M2 的播放器还能播）。
+   如果上一级也坏了，说明问题出在你最近改的东西——Git 看 diff（02 章：`git diff`）
+2. **分边**：打开 F12 Network（16 章的黄金分界法）——请求发出去了吗？后端回了什么？
+   一分钟定位问题在前端还是后端
+3. **对表**：每章末尾都有"常见错误与排查"表，你撞的坑大概率在里面
+4. **最小化复现**：把出问题的功能剥离到一个单独的小 html/py 文件里单独跑——
+   剥离的过程往往自己就发现了问题
+5. **正确地求助**：带着三样东西提问（问 AI 或人都一样）——
+   ① 完整报错原文 ② 相关代码片段 ③ 你已经试过什么。
+   "不行了/报错了"三个字的提问，谁也帮不了你
+
+> 最重要的心态：**卡住不是走错了路，是走到了自己能力边界——边界就是这么推出去的。**
 
 ---
 
@@ -226,8 +376,10 @@ audiobook/
 
 ## 小练习（交付 M1）
 
-1. 按第 7 节结构建好 `audiobook/` 项目骨架（venv、依赖、包结构、uploads/）。
-2. 在 database.py 写好两张表的 `init_db()`，含 `PRAGMA foreign_keys = ON`，启动验证建表成功。
+1. 按 7.1 结构建好 `audiobook/` 项目骨架（venv、依赖、包结构、uploads/），
+   database.py 抄 7.2、index.html 抄 7.3。
+2. 按 7.4 把**两个终端**都跑起来：后端 /docs 能打开、前端空页面五个区块可见、
+   浏览器 Console 无红字（验证 CORS 和模块加载都正常）。
 3. 用 `sqlite3` 命令行（05 章技能）手动 INSERT 一条假 audios 记录和一条引用它的 clips 记录；
    再试着 INSERT 一条 `audio_id=999` 的 clips——观察外键报错长什么样。
 4. 写出第 5 节那条 JOIN 查询，确认能查出"块+素材名"的拼接结果。

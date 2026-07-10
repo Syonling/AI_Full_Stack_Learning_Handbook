@@ -18,6 +18,8 @@
 4. 理解 `async / await` 是什么（FastAPI 路由函数常用）
 5. 会用 `try / except` 处理异常
 6. 理解模块导入（`import`），为多文件项目做准备
+7. 掌握控制流的**惯用写法**（break / continue / 循环 else / pass 等）
+8. 看懂**类（class）的定义**——后面所有 Pydantic 模型的语法基础
 
 ---
 
@@ -294,6 +296,115 @@ msg = f"user {name} has {count} todos"        # 变量直接嵌入
 price = f"total: {19.9 * 2:.2f}"              # 保留两位小数 → total: 39.80
 debug = f"{name=}"                            # 调试技巧 → name='Alice'
 ```
+
+---
+
+## 8. 控制流的惯用写法
+
+> if / for / while 的基本语法你已经会了，这一节只讲**实际项目里高频、但教材少讲的写法**——
+> 后面的章节（尤其 07 的 Agent 循环、25 的调度器）会反复用到。
+
+```python
+# ── break：跳出整个循环（Agent 循环的退出方式就是它）──
+while True:                     # "先干着，满足条件再走"的标准形态
+    result = do_step()
+    if result.finished:
+        break                   # 唯一出口
+
+# ── continue：跳过本轮，直接进下一轮（提前排除法，减少嵌套）──
+for item in items:
+    if not item.get("valid"):
+        continue                # 无效的直接跳过
+    process(item)               # 处理逻辑不用包在 if 里，少一层缩进
+
+# ── for...else：循环没被 break 中断时，执行 else（"找没找到"场景）──
+for user in users:
+    if user["id"] == target_id:
+        print("found:", user)
+        break
+else:                           # 注意：和 for 对齐，不是和 if 对齐！
+    print("not found")          # 循环正常跑完（没 break）才进这里
+
+# ── pass：语法占位符，"这里什么都不做" ──
+def not_implemented_yet():
+    pass                        # 函数体不能为空，用 pass 占位
+
+try:
+    risky()
+except TimeoutError:
+    pass                        # 明确表示：这个异常我知道，故意忽略
+
+# ── 三元表达式：一行的 if/else（赋值场景专用）──
+status = "done" if todo["done"] else "pending"
+
+# ── enumerate / zip：遍历时的两个搭档 ──
+for i, item in enumerate(items, start=1):    # 同时拿序号和值
+    print(f"{i}. {item}")
+
+for name, score in zip(names, scores):       # 两个列表并排走
+    print(name, score)
+
+# ── while 循环加安全阀：防死循环烧资源（12 章 Agent 会再遇到）──
+for _ in range(10):             # 最多循环 10 次，代替裸的 while True
+    if try_once():
+        break
+```
+
+> **要点**：`for...else` 的 `else` 读作"没有 break 地跑完了"——这是 Python 独有的写法，
+> 别的语言的人也经常看不懂，但"找没找到"这个场景它最优雅。
+
+---
+
+## 9. 类与对象：看懂 Pydantic 的最小集
+
+后面的章节会大量出现这种代码（06 章起几乎每章都有）：
+
+```python
+class TodoCreate(BaseModel):
+    title: str
+    done: bool = False
+```
+
+这是**类（class）**的语法。你不需要精通面向对象，只需要这个"看懂它"的最小集：
+
+```python
+# ── 类 = 数据 + 操作数据的函数，打包成一个"模具" ──
+class Player:
+    def __init__(self, name: str):      # 构造函数：创建对象时自动执行
+        self.name = name                # self.xxx = 这个对象自己的数据
+        self.volume = 0.8
+
+    def play(self, filename: str):      # 方法：定义在类里的函数
+        print(f"{self.name} is playing {filename} at {self.volume}")
+        # self 是"我自己"——方法通过它访问自己的数据
+
+# ── 用模具造对象（实例化）──
+p = Player("主播放器")     # 自动调用 __init__，"主播放器" 传给 name
+p.play("intro.mp3")        # 调方法时不用传 self，Python 自动填
+
+p.volume = 0.5             # 对象的数据可以直接读写
+print(p.name)              # 主播放器
+```
+
+三个术语对上号：**类**是图纸，**对象/实例**是照图纸造出来的东西，**方法**是类里的函数（第一个参数永远是 `self`）。
+
+### 那 Pydantic 模型为什么长得不太一样？
+
+```python
+class TodoCreate(BaseModel):      # 括号里 = 继承：拿 BaseModel 的能力当底子
+    title: str                    # 不写 __init__，直接声明字段+类型
+    done: bool = False            # BaseModel 会根据这些声明自动生成构造函数
+
+todo = TodoCreate(title="learn class")   # 所以能这样传参创建
+todo.title                                # 也能这样点出数据
+```
+
+**继承**（括号里写父类）= "在别人的基础上添加/修改"。`BaseModel` 这个底子提供了
+校验、转 JSON 等全部魔法，你只负责声明"数据长什么样"。
+
+> **要点**：本书里你**写**的类 99% 是 Pydantic 模型（只声明字段），
+> 偶尔**读**到普通类（如 24 章的合成器）。达到"看懂 self、看懂继承括号"即可，
+> 不需要学习更深的面向对象体系——用到时再补。
 
 ---
 

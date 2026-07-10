@@ -282,6 +282,42 @@ async def slow_task() -> str:
     return "done"`,
  tip:"FastAPI 路由函数写 def 或 async def 都可以，初学阶段不必纠结。"},
 
+{cat:"python", title:"循环的惯用写法", kw:"break continue for else pass enumerate zip 三元",
+ desc:"基本语法之外，实际项目里高频的循环写法。",
+ code:`while True:                 # "先干着，条件满足再走"
+    if finished: break      # 唯一出口
+
+for item in items:
+    if not item: continue   # 提前排除，减少嵌套
+    process(item)
+
+for u in users:             # for...else："找没找到"场景
+    if u["id"] == target: break
+else:
+    print("not found")      # 没 break 才进这里
+
+status = "done" if ok else "pending"    # 三元表达式
+for i, x in enumerate(items, start=1):  # 带序号遍历
+    ...
+for _ in range(10):         # 带安全阀的重试，代替裸 while True
+    ...`},
+
+{cat:"python", title:"类与对象（看懂 Pydantic 的最小集）", kw:"class self init 方法 继承 实例",
+ desc:"类=模具，对象=造出来的东西，方法=类里的函数（第一个参数永远 self）。",
+ code:`class Player:
+    def __init__(self, name):    # 构造函数：创建时自动执行
+        self.name = name         # self.xxx = 对象自己的数据
+    def play(self, file):        # 方法
+        print(self.name, file)
+
+p = Player("主播放器")            # 实例化
+p.play("intro.mp3")              # 调用不传 self
+
+# 继承：括号里 = 在父类基础上扩展
+class TodoCreate(BaseModel):     # BaseModel 提供校验/JSON 魔法
+    title: str                   # 你只声明"数据长什么样"
+    done: bool = False`},
+
 {cat:"python", title:"模块导入 import", kw:"from module 多文件 拆分",
  desc:"把代码拆到多个文件后互相引用。文件名去掉 .py 就是模块名。",
  code:`# database.py 里有 get_connection 函数时：
@@ -2086,6 +2122,40 @@ JSON.parse('{"title":"abc"}')      // JSON 字符串 → 对象
 
 // fetch 里通常不用 parse，直接：
 const data = await response.json();`},
+
+{cat:"js", title:"定时器 setTimeout / setInterval", kw:"timer 轮询 clearinterval 延迟 每秒",
+ desc:"setTimeout 稍后执行一次；setInterval 每隔 N 毫秒执行。铁律：开了就要有人负责 clear。",
+ code:`const id1 = setTimeout(() => hide(), 3000);   // 3 秒后一次
+const id2 = setInterval(() => poll(), 1000);  // 每秒一次（轮询）
+
+clearTimeout(id1);
+clearInterval(id2);    // ★ 忘 clear = 永远跑下去`,
+ tip:"轮询场景：成功和失败分支都要 clearInterval，只写成功分支会永远轮下去。"},
+
+{cat:"js", title:"展开运算符 ...", kw:"spread 摊开 合并 拷贝 覆盖字段",
+ desc:"把数组/对象摊开：传参、拷贝、合并、复制并覆盖。",
+ code:`Math.max(...nums)              // 数组摊开成参数
+const copy = [...nums];        // 浅拷贝
+const merged = [...a, ...b];   // 合并
+const updated = { ...todo, done: true };  // 复制对象+覆盖字段`},
+
+{cat:"js", title:"解构赋值", kw:"destructuring 提取 按名取 参数解构",
+ desc:"从对象/数组按名提取，少写一堆 xxx.yyy。函数参数也能直接解构。",
+ code:`const { audio_id, duration } = clip;    // 一次取两个字段
+const [first, second] = arr;            // 数组按位置取
+
+// 回调参数直接解构（高频写法）
+const fmt = ({ audio_id, duration }) => \`#\${audio_id}: \${duration}s\`;`},
+
+{cat:"js", title:"ES Modules 页面必须用服务器跑", kw:"import export type module http.server file 双击",
+ desc:"用了 import/export 的页面不能双击（file://）打开——起个本地静态服务器。",
+ code:`<script src="js/main.js" type="module" defer></script>
+
+# 在前端目录起服务器：
+python3 -m http.server 3000
+# 访问 http://localhost:3000
+
+# 后端 API 在另一端口 → 记得配 CORS`},
 
 {cat:"js", title:"常见报错速查", kw:"null undefined not defined 排错 报错",
  desc:"JS 新手三大报错的定位方法。",

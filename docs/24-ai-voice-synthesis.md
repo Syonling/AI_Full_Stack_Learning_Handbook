@@ -69,7 +69,9 @@ class EdgeTTS:
         voice_id = VOICES.get(voice, VOICES["xiaoxiao"])
         communicate = edge_tts.Communicate(text, voice_id)
         chunks = []
-        async for chunk in communicate.stream():        # 服务端流式返回
+        # async for = 异步版的 for：数据是一段段从网络到达的，
+        # 每到一段处理一段，等待期间不阻塞别的请求（01 章 async 的实战形态）
+        async for chunk in communicate.stream():
             if chunk["type"] == "audio":
                 chunks.append(chunk["data"])
         return b"".join(chunks)                         # 拼成完整 mp3 字节
@@ -119,14 +121,8 @@ class CloudAITTS:
 ## 4. 合成路由：pending 状态 + 后台任务
 
 合成一段几百字的文本要花好几秒——**绝不能让 HTTP 请求傻等**（用户以为卡死了）。
-用 09 章的 BackgroundTasks + 一个状态字段解决：
-
-先给 audios 表加状态列（21 章建表语句里补一行，或 ALTER）：
-
-```sql
-ALTER TABLE audios ADD COLUMN status TEXT NOT NULL DEFAULT 'ready';
--- 'pending' 合成中 | 'ready' 可用 | 'failed' 失败
-```
+用 09 章的 BackgroundTasks + audios 表的 `status` 字段解决
+（21 章建表时已备好：`'pending'` 合成中 / `'ready'` 可用 / `'failed'` 失败）。
 
 ```python
 # routers/synthesize.py

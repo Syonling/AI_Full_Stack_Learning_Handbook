@@ -250,6 +250,67 @@ submitButton.addEventListener('click', async () => {        // 6. 监听点击
 
 ---
 
+## 8. 三件后面必用的散装武器
+
+这三样在音频项目章节（21~25）里高频出现，提前备好：
+
+### 8.1 定时器：setTimeout / setInterval
+
+```javascript
+// setTimeout：N 毫秒后执行一次（"稍后做一件事"）
+const id1 = setTimeout(() => {
+    banner.classList.add("hidden");     // 3 秒后自动隐藏提示条
+}, 3000);
+
+// setInterval：每 N 毫秒执行一次（轮询、时钟、调度都是它）
+const id2 = setInterval(() => {
+    console.log("每秒问一次：好了吗？");
+}, 1000);
+
+// ★ 铁律：开了就要有人负责关，否则永远跑下去（内存泄漏 + 疯狂请求）
+clearTimeout(id1);
+clearInterval(id2);
+```
+
+记住这个模式——**"开定时器时就想好谁来 clear 它"**。24 章的轮询、25 章的播放调度器
+全靠 setInterval，而它们的 bug 也几乎全是"忘了 clear"。
+
+### 8.2 展开运算符 `...`
+
+把数组/对象"摊开"：
+
+```javascript
+const nums = [3, 7, 2];
+Math.max(...nums);              // 等于 Math.max(3, 7, 2) → 7
+const copy = [...nums];         // 浅拷贝一份数组
+const merged = [...a, ...b];    // 合并两个数组
+
+const todo = { id: 1, title: "learn" };
+const updated = { ...todo, done: true };   // 复制对象并覆盖某字段（很常用）
+```
+
+### 8.3 解构赋值
+
+从对象/数组里"按名提取"，少写一堆 `xxx.yyy`：
+
+```javascript
+const clip = { audio_id: 3, start_seconds: 4.5, duration: 10 };
+
+const { audio_id, duration } = clip;       // 一次取出两个字段
+console.log(audio_id, duration);           // 3 10
+
+// 函数参数直接解构（回调里特别顺手）
+const summarize = ({ audio_id, duration }) => `#${audio_id}: ${duration}s`;
+
+// 数组解构
+const [first, second] = ["a", "b", "c"];   // first="a", second="b"
+```
+
+> **要点**：`{ ...todo, done: true }` 和 `({ a, b }) => ...` 这两个写法
+> 在现代 JS 代码里出现率极高——即使自己先不写，也必须能一眼读懂。
+
+---
+
 ## 常见错误与排查
 
 | 报错/现象 | 原因 | 解决 |
