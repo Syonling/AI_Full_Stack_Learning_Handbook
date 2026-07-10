@@ -53,6 +53,11 @@
 | 18 | [前端工程组织](docs/18-frontend-engineering.md) | 文件夹分层、CSS 设计令牌、BEM、JS 模块化（含 Vue 对照） | 3~4 小时 |
 | 19 | [设计美学：Apple 风格](docs/19-apple-design.md) | HIG 三原则、8pt 留白、毛玻璃、Apple 风换肤实战 | 3~4 小时 |
 | 20 | [后端代码组织](docs/20-backend-engineering.md) | 分层、包结构、循环导入、service 拆分时机（属「工程化落地」组，学完 10 章即可读） | 3~4 小时 |
+| 21 | [音频应用总览与选型](docs/21-audio-overview.md) | 音频零基础速成、架构、外键与 JOIN、选型总表 🎧 项目实践开篇 | 2~3 小时 |
+| 22 | [音频播放与播放器](docs/22-audio-playback.md) | audio 标签、Range 请求、自动播放策略、自定义播放器、波形 | 3~4 小时 |
+| 23 | [素材入库：上传与录音](docs/23-audio-upload-recording.md) | FormData 上传、uuid 安全命名、mutagen、MediaRecorder 录音 | 4~5 小时 |
+| 24 | [AI 语音合成](docs/24-ai-voice-synthesis.md) | 适配器模式、edge-tts 替身、AI API 插槽、202+轮询 | 3~4 小时 |
+| 25 | [时间轴编辑器](docs/25-audio-timeline.md) | 像素⇄秒坐标系、Pointer 拖拽、保存加载、串播调度器 🎓 毕业项目 | 6~8 小时 |
 
 > 📐 编号规则说明：文件编号是**永久 ID**（只增不改）。后插入的章节按内容归入对应分组、排在组末保持编号升序，章内标注建议阅读位置。
 

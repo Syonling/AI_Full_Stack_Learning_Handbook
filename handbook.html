@@ -174,6 +174,7 @@ const CATS = {
   html:    "HTML",
   css:     "CSS",
   js:      "JavaScript",
+  audio:   "音频开发",
 };
 
 /* 每条 = { cat, title, desc, code, tip?, kw(额外搜索词) } */
@@ -2099,6 +2100,216 @@ Assignment to constant variable
 
 调试三板斧：console.log → F12 Console 看第一条红字
 → Sources 面板打断点`},
+
+/* ── 音频开发 ─────────────────────────────── */
+{cat:"audio", title:"音频格式怎么选", kw:"mp3 wav webm 格式 兼容 大小",
+ desc:"Web 场景默认 mp3（兼容之王）；浏览器录音原生产物是 webm；wav 无损但巨大。",
+ code:`mp3    有损压缩，全浏览器支持 → 默认选它
+wav    无损，1 分钟 ≈ 10MB → 原始素材才用
+webm   MediaRecorder 录出来就是它，可直接播
+
+大小心算：比特率(kbps) ÷ 8 × 秒数
+128kbps 的 mp3：1 分钟 ≈ 1MB`},
+
+{cat:"audio", title:"audio 标签速用", kw:"标签 controls 播放器 原生",
+ desc:"一行就是播放器。开发流程：先 controls 验证链路，再换自定义 UI。",
+ code:`<audio src="/files/test.mp3" controls></audio>
+
+// JS 里创建：
+const audio = new Audio("/files/test.mp3");`},
+
+{cat:"audio", title:"JS 控制播放", kw:"play pause currenttime seek 倍速 playbackrate volume",
+ desc:"自定义播放器的全部原料。currentTime 赋值就是 seek。",
+ code:`audio.play();               // 返回 Promise，要 catch！
+audio.pause();
+audio.currentTime = 42.5;   // 跳到 42.5 秒
+audio.duration;             // 总时长（元数据加载后才有）
+audio.playbackRate = 1.5;   // 倍速
+audio.volume = 0.8;         // 音量 0~1
+audio.paused;               // 是否暂停中`},
+
+{cat:"audio", title:"音频三大事件", kw:"loadedmetadata timeupdate ended 事件监听",
+ desc:"loadedmetadata 初始化 UI；timeupdate 驱动进度条；ended 复位/切下一首。",
+ code:`audio.addEventListener("loadedmetadata", () => {
+    seekEl.max = audio.duration;    // duration 此前是 NaN！
+});
+audio.addEventListener("timeupdate", () => {
+    seekEl.value = audio.currentTime;   // 约每秒 4 次
+});
+audio.addEventListener("ended", () => {
+    playBtn.textContent = "▶";
+});`},
+
+{cat:"audio", title:"自动播放被拦截", kw:"notallowederror autoplay 策略 无声",
+ desc:"浏览器禁止无用户交互出声。播放永远由点击触发，play() 永远 catch。",
+ code:`// ❌ 页面一加载就播 → NotAllowedError
+// ✅ 用户手势触发 + 接住失败
+playBtn.addEventListener("click", async () => {
+    try {
+        await audio.play();
+    } catch {
+        showHint("点击 ▶ 开始播放");
+    }
+});`},
+
+{cat:"audio", title:"进度条拖动三件套", kw:"seek input change 抖动 滑块",
+ desc:"input 预览 + change 提交 + seeking 锁——没有锁，timeupdate 会把滑块拽回去。",
+ code:`let seeking = false;
+audio.addEventListener("timeupdate", () => {
+    if (seeking) return;              // 拖动中不跟随
+    seekEl.value = audio.currentTime;
+});
+seekEl.addEventListener("input", () => { seeking = true; });
+seekEl.addEventListener("change", () => {
+    audio.currentTime = Number(seekEl.value);   // 松手才真 seek
+    seeking = false;
+});`},
+
+{cat:"audio", title:"时长格式化 mm:ss", kw:"format time 秒 转换 显示",
+ desc:"播放器必备小函数。",
+ code:`function formatTime(seconds) {
+    if (!Number.isFinite(seconds)) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return \`\${m}:\${s}\`;
+}`},
+
+{cat:"audio", title:"后端提供音频：StaticFiles + Range", kw:"206 partial content 静态 拖进度",
+ desc:"StaticFiles 自动支持 Range 请求——进度条能拖全靠它。自己写路由不处理 Range 会卡死 seek。",
+ code:`app.mount("/files", StaticFiles(directory="uploads"), name="files")
+
+# 验证支持 Range（应返回 206）：
+# curl -s -i -H "Range: bytes=0-99" http://127.0.0.1:8000/files/test.mp3 | head -3`},
+
+{cat:"audio", title:"音频存储铁律", kw:"blob 磁盘 路径 数据库 存哪",
+ desc:"文件本体存磁盘，数据库只存元数据（文件名/时长/大小）。别塞 SQLite BLOB。",
+ code:`uploads/3f2a9c...b1.mp3      ← 文件本体（磁盘）
+
+audios 表：                   ← 关于文件的一切（数据库）
+  filename      磁盘文件名（uuid）
+  display_name  给用户看的名字
+  duration      时长（mutagen 读）
+  size_bytes / source / created_at`},
+
+{cat:"audio", title:"前端上传：FormData", kw:"file input accept 上传 multipart",
+ desc:"发文件用 FormData 而不是 JSON。⚠️ 不要手动设 Content-Type（会破坏 boundary）。",
+ code:`<input type="file" accept="audio/*">
+
+const formData = new FormData();
+formData.append("file", file);       // 键名 = 后端参数名
+await fetch("/audios", {
+    method: "POST",
+    body: formData,                  // 不设 Content-Type！
+});`},
+
+{cat:"audio", title:"拖拽文件上传", kw:"drop dragover 拖入 preventdefault",
+ desc:"dragover 和 drop 都必须 preventDefault，否则浏览器直接打开文件。",
+ code:`zone.addEventListener("dragover", (e) => {
+    e.preventDefault();                       // ★ 必须
+    zone.classList.add("over");
+});
+zone.addEventListener("drop", (e) => {
+    e.preventDefault();                       // ★ 必须
+    const file = e.dataTransfer.files[0];
+    if (file) uploadFile(file);
+});`},
+
+{cat:"audio", title:"后端接收上传 + uuid 重命名", kw:"uploadfile 安全 路径穿越 文件名",
+ desc:"原始文件名不可信（路径穿越/重名/特殊字符）。uuid 存磁盘，原名存 display_name。",
+ code:`import uuid
+from fastapi import UploadFile
+
+@router.post("")
+async def upload(file: UploadFile):
+    data = await file.read()
+    ext = Path(file.filename or "a.mp3").suffix.lower()
+    stored = f"{uuid.uuid4().hex}{ext}"     # 系统用
+    (UPLOAD_DIR / stored).write_bytes(data)
+    # display_name 存 file.filename        # 给人看`,
+ tip:"content_type 可伪造——再用 mutagen 真解析一次做二次验证。"},
+
+{cat:"audio", title:"mutagen 读音频元数据", kw:"时长 duration 元信息 校验",
+ desc:"纯 Python 无系统依赖。读不出 = 不是真音频，顺便当二次校验。",
+ code:`from mutagen import File as MutagenFile
+
+meta = MutagenFile("uploads/abc.mp3")
+if meta is None or meta.info is None:
+    ...  # 不是有效音频，删文件并拒绝
+duration = round(meta.info.length, 2)   # 秒`},
+
+{cat:"audio", title:"MediaRecorder 录音", kw:"getusermedia 麦克风 录制 blob",
+ desc:"三步：授权 → 分片攒数据 → 停止时打包。录完务必释放麦克风（红点消失）。",
+ code:`const stream = await navigator.mediaDevices
+    .getUserMedia({ audio: true });          // 弹授权框
+const recorder = new MediaRecorder(stream);
+const chunks = [];
+recorder.addEventListener("dataavailable", (e) => chunks.push(e.data));
+recorder.addEventListener("stop", () => {
+    stream.getTracks().forEach((t) => t.stop());  // ★ 释放麦克风
+    const blob = new Blob(chunks, { type: "audio/webm" });
+    // new File([blob], "录音.webm") → 复用上传链路
+});
+recorder.start();   // recorder.stop() 结束`,
+ tip:"getUserMedia 只在 https 或 localhost 下可用；权限被拒要给用户指路。"},
+
+{cat:"audio", title:"edge-tts 语音合成", kw:"tts 文字转语音 微软 免费 合成",
+ desc:"免费、无需 key 的合成方案，适合开发阶段。输出直接是 mp3 字节。",
+ code:`# pip install edge-tts
+import edge_tts
+
+communicate = edge_tts.Communicate("你好世界", "zh-CN-XiaoxiaoNeural")
+chunks = []
+async for chunk in communicate.stream():
+    if chunk["type"] == "audio":
+        chunks.append(chunk["data"])
+mp3_bytes = b"".join(chunks)
+
+# 命令行看全部音色：edge-tts --list-voices`,
+ tip:"生产换 AI API 时走适配器模式：定义 synthesize(text)→bytes 插槽，换实现不换系统。"},
+
+{cat:"audio", title:"慢任务模式：202 + 状态轮询", kw:"pending background 异步 轮询 合成中",
+ desc:"合成/转码等慢操作的通用解法：先占位记录 → 202 立返 → 后台干活改状态 → 前端轮询。",
+ code:`# 后端：INSERT status='pending' → 202
+# 后台任务完成 → UPDATE status='ready'/'failed'
+
+// 前端轮询：
+const timer = setInterval(async () => {
+    const a = await (await fetch(\`/audios/\${id}\`)).json();
+    if (a.status === "pending") return;
+    clearInterval(timer);            // ready 和 failed 都要停！
+    if (a.status === "ready") refreshLibrary();
+}, 1000);`},
+
+{cat:"audio", title:"时间轴核心：像素⇄秒换算", kw:"timeline 坐标 px_per_second 拖拽 位置",
+ desc:"时间轴的地基：横坐标就是时间。定好比例，渲染和拖拽都是换算。",
+ code:`const PX_PER_SECOND = 20;
+const secToPx = (sec) => sec * PX_PER_SECOND;
+const pxToSec = (px) => px / PX_PER_SECOND;
+
+// 渲染：left = secToPx(start_seconds)
+//       width = secToPx(duration)
+// 拖动：新 start = 原 start + pxToSec(鼠标位移)`},
+
+{cat:"audio", title:"拖动块：Pointer 三事件", kw:"pointerdown pointermove pointerup setpointercapture 拖块",
+ desc:"拖拽的通用模式。setPointerCapture 让鼠标滑出元素也不断——体验分水岭。",
+ code:`el.addEventListener("pointerdown", (e) => {
+    el.setPointerCapture(e.pointerId);   // ★ 神器
+    const startX = e.clientX;
+    const origin = clip.start_seconds;
+
+    const onMove = (ev) => {
+        clip.start_seconds = Math.max(0,
+            origin + pxToSec(ev.clientX - startX));
+        el.style.left = secToPx(clip.start_seconds) + "px";
+    };
+    const onUp = () => {
+        el.removeEventListener("pointermove", onMove);
+        el.removeEventListener("pointerup", onUp);
+        // 吸附到 0.5s：Math.round(x * 2) / 2
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+});`},
 ];
 
 /* ── 渲染 ─────────────────────────────── */

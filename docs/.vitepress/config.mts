@@ -84,6 +84,17 @@ export default defineConfig({
           { text: '19 · 设计美学：Apple 风格', link: '/19-apple-design' },
         ],
       },
+      {
+        text: '项目实践：音频应用',
+        collapsed: false,
+        items: [
+          { text: '21 · 音频应用总览与选型', link: '/21-audio-overview' },
+          { text: '22 · 音频播放与播放器', link: '/22-audio-playback' },
+          { text: '23 · 素材入库：上传与录音', link: '/23-audio-upload-recording' },
+          { text: '24 · AI 语音合成', link: '/24-ai-voice-synthesis' },
+          { text: '25 · 时间轴编辑器（毕业项目）', link: '/25-audio-timeline' },
+        ],
+      },
     ],
 
     // ── 上一章 / 下一章（按 sidebar 顺序自动生成）──

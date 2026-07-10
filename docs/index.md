@@ -72,6 +72,11 @@ features:
 | 18 | [前端工程组织](/18-frontend-engineering) | 文件夹分层、CSS 设计令牌、BEM 命名、JS 模块化（含 Vue 项目对照） | 3~4 小时 |
 | 19 | [设计美学：Apple 风格](/19-apple-design) | HIG 三原则、8pt 留白、字阶、毛玻璃、Apple 风换肤实战 | 3~4 小时 |
 | 20 | [后端代码组织](/20-backend-engineering) | 分层思想、包结构、循环导入、service 层拆分时机（属「工程化落地」组，学完 10 章即可读） | 3~4 小时 |
+| 21 | [音频应用总览与选型](/21-audio-overview) | 音频零基础速成、架构设计、外键与 JOIN、选型总表 🎧 | 2~3 小时 |
+| 22 | [音频播放与播放器](/22-audio-playback) | audio 标签、Range 请求、自动播放策略、自定义播放器、波形 | 3~4 小时 |
+| 23 | [素材入库：上传与录音](/23-audio-upload-recording) | FormData 上传、uuid 安全命名、mutagen、MediaRecorder 录音 | 4~5 小时 |
+| 24 | [AI 语音合成](/24-ai-voice-synthesis) | 适配器模式、edge-tts 免费替身、AI API 插槽、202+轮询 | 3~4 小时 |
+| 25 | [时间轴编辑器](/25-audio-timeline) | 像素⇄秒坐标系、Pointer 拖拽、保存加载、串播调度器 🎓 毕业项目 | 6~8 小时 |
 
 > 🎨 **前端章节（13~17）无需按总编号顺序等待**——HTML/CSS 没有任何前置依赖，可与后端章节并行学习；
 > 16 章需要后端 demo 能跑起来（07 章），17 章需要先完成 16 章。
