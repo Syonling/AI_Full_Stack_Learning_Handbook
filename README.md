@@ -13,7 +13,7 @@
 
 | 场景 | 用什么 | 怎么用 |
 |---|---|---|
-| 📖 **系统学习** | [在线教程](https://syonling.github.io/AI_Full_Stack_Learning_Handbook/) 或 [docs/](docs/) 十二章文档 | 按下面的路线顺序阅读，每章末尾有小练习 |
+| 📖 **系统学习** | [在线教程](https://syonling.github.io/AI_Full_Stack_Learning_Handbook/) 或 [docs/](docs/) 全部 25 章文档 | 按下面的路线顺序阅读，每章末尾有小练习 |
 | 🔍 **日常速查** | 网站导航栏 **Code Search**（即 [handbook.html](handbook.html)，本地也可双击打开） | 搜索关键词（中英文都行），代码一键复制 |
 | 🛠 **动手实践** | [demo/](demo/) 可运行项目 | 按 [demo/README.md](demo/README.md) 的步骤跑起来，边学边改 |
 
@@ -66,38 +66,27 @@
 > 💡 学习方法建议：**每章边读边敲代码**（不要复制粘贴）；从 02 章开始每章练习完成后 `git commit` 一次；
 > 读完 07 章一定把 [demo/](demo/) 完整跑一遍，08、09 章会带你解锁 demo 里的"生产四件套"。
 
-## 学完之后：应用到你的 Audio Book 项目
+## 学完之后：毕业项目路线
 
-你的 [Frontend/main.html](../Frontend/main.html) 已经会调用 `POST /story` 和 `GET /story`。学完本系列后，你完全有能力在 [Backend/main.py](../Backend/main.py) 里实现它：
+1. **热身**（16 章终极练习）：从零实现「Audio Book 雏形」——`POST /story` 存故事、`GET /story` 查列表，配一个最简前端页面（13 章第 6 节的原型）
+2. **正餐**（21~25 章）：跟着「项目实践」把它长成完整的音频工作台——上传、录音、AI 合成、时间轴编排
+3. **上桌**：用 02 章的 Git 管理它、11 章的方式部署它，做成你自己的产品
 
-1. 参照 demo 的结构搭建 Backend（含 config.py、日志、异常兜底）
-2. 建一张 `stories` 表（字段：`id`、`text`）
-3. 实现 `POST /story`（接收 `{"text": ...}`，存入 SQLite，返回消息）
-4. 实现 `GET /story`（返回所有故事的列表 `[{"text": ...}, ...]`，正好匹配前端的 `data.map(item => item.text)`）
-5. 记得配置 CORS（或用 StaticFiles 让后端直接托管前端页面）
-6. 用 02 章的 Git 管理它、11 章的方式部署它
-
-这就是「学以致用」的第一个里程碑 🎉
+这就是「学以致用」的完整路线 🎉
 
 ## 目录结构
 
 ```
 learning_from_claude/
 ├── README.md            ← 你在这里
-├── handbook.html        ← 交互式速查手册（140+ 条目，可搜索）
-├── docs/                ← 十二章深度文档（编号即学习顺序）
-│   ├── 01-python-backend-basics.md
-│   ├── 02-git-basics.md
-│   ├── 03-logging-and-debugging.md
-│   ├── 04-fastapi-basics.md
-│   ├── 05-sqlite-basics.md
-│   ├── 06-fastapi-advanced.md
-│   ├── 07-fastapi-sqlite-crud.md
-│   ├── 08-config-and-env.md
-│   ├── 09-fastapi-engineering.md
-│   ├── 10-testing-and-structure.md
-│   ├── 11-deployment.md
-│   └── 12-ai-agents.md      ← Agent / MCP / Skill / LangChain / LangGraph
+├── handbook.html        ← 交互式速查手册（210+ 条目，可搜索）
+├── docs/                ← 25 章深度文档 + VitePress 站点配置
+│   ├── 01~03  基础工具（Python / Git / 日志与调试）
+│   ├── 04~07  后端主线（FastAPI / SQLite / 整合实战）
+│   ├── 08~11、20  工程化落地（配置 / 工程化 / 测试 / 部署 / 代码组织）
+│   ├── 12     AI Agent（进阶选修）
+│   ├── 13~19  前端开发（HTML / CSS / JS / Vue / 工程组织 / Apple 设计）
+│   └── 21~25  项目实践：音频应用（完整清单见上方路线表）
 └── demo/                ← 可运行的 Todo CRUD API（带生产四件套）
     ├── README.md        ← 运行步骤
     ├── requirements.txt

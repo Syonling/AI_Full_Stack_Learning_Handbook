@@ -20,18 +20,18 @@ hero:
 features:
   - icon: 📖
     title: 系统学习
-    details: 十二章深度教程，编号即学习顺序。每章包含学习目标、完整代码示例、常见错误排查表和小练习。
+    details: 25 章深度教程：后端 → 工程化 → 前端 → AI Agent → 音频项目实践。每章包含学习目标、完整代码示例、常见错误排查表和小练习。
     link: /01-python-backend-basics
     linkText: 从第 01 章开始
   - icon: 🔍
     title: 日常速查
-    details: 140+ 条速查卡片，覆盖 Python / FastAPI / SQLite / Git / 日志 / 部署 / AI Agent，支持中英文关键词搜索、代码一键复制。
+    details: 210+ 条速查卡片，覆盖 Python / FastAPI / SQLite / Git / 前端三件套 / 音频开发 / AI Agent，支持中英文关键词搜索、代码一键复制。
     link: /handbook.html
     linkText: 打开 Code Search
     target: _blank
   - icon: 🛠
     title: 动手实践
-    details: 配套可运行的 Todo CRUD API（demo/ 目录），带日志、异常兜底、.env 配置等"生产四件套"，与教程逐行对应。
+    details: 可运行的 Todo 全栈 demo（前后端齐备、带生产四件套），加上 21~25 章从零带做的音频工作台毕业项目。
     link: /07-fastapi-sqlite-crud
     linkText: 查看整合实战
 ---
@@ -90,7 +90,7 @@ features:
 
 | 场景 | 用什么 | 怎么用 |
 |---|---|---|
-| 📖 **系统学习** | 左侧目录十二章教程 | 按编号顺序阅读，每章末尾有小练习 |
+| 📖 **系统学习** | 左侧目录全部 25 章教程 | 按侧边栏顺序阅读，每章末尾有小练习 |
 | 🔍 **日常速查** | 顶部导航 **Code Search** | 搜索中英文关键词，代码一键复制 |
 | 🛠 **动手实践** | 仓库中的 `demo/` 目录 | 按 demo/README.md 的步骤跑起来，边学边改 |
 

@@ -33,18 +33,18 @@
 
 ```python
 # routers/audios.py
+import sqlite3
 import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from mutagen import File as MutagenFile
 
-from app.core.config import settings
+from app.core.config import UPLOAD_DIR      # 绝对路径常量（21 章 7.2）
 from app.db.database import get_db
 
 router = APIRouter(prefix="/audios", tags=["audios"])
 
-UPLOAD_DIR = Path("uploads")
 ALLOWED_TYPES = {"audio/mpeg", "audio/wav", "audio/x-wav", "audio/webm", "audio/mp4"}
 MAX_SIZE = 50 * 1024 * 1024      # 50MB（放进 08 章的 Settings 更好）
 
@@ -109,13 +109,17 @@ def delete_audio(audio_id: int, db=Depends(get_db)):
     row = db.execute("SELECT * FROM audios WHERE id = ?", (audio_id,)).fetchone()
     if row is None:
         raise HTTPException(404, "audio not found")
-    (UPLOAD_DIR / row["filename"]).unlink(missing_ok=True)   # 文件和记录一起删
-    db.execute("DELETE FROM audios WHERE id = ?", (audio_id,))
-    db.commit()
+    try:
+        db.execute("DELETE FROM audios WHERE id = ?", (audio_id,))
+        db.commit()                              # ① 先删记录：外键检查在这一步把关
+    except sqlite3.IntegrityError:               # 被 clips 引用 → 数据库拒删
+        raise HTTPException(409, "该素材正在时间轴中使用，请先从时间轴移除")
+    (UPLOAD_DIR / row["filename"]).unlink(missing_ok=True)   # ② 记录删成功，才删文件
 ```
 
-（被时间轴引用的素材，外键会拦住删除——这正是 21 章打开 `PRAGMA foreign_keys` 的价值。
-把 409 错误提示给用户："该素材正在时间轴中使用"。）
+注意**先删记录、后删文件**的顺序：外键检查发生在删记录那一步（21 章 `PRAGMA foreign_keys`
+的价值兑现）——如果反过来先删文件，被外键拦下后就会留下一条"指向已消失文件"的孤儿记录。
+这种"两步操作谁先谁后"的推敲，是后端开发的日常功课。
 
 ---
 

@@ -237,6 +237,14 @@ finally:
 def set_age(age: int):
     if age < 0:
         raise ValueError("age cannot be negative")
+
+# except 里"不带参数的 raise"：把刚捕获的异常原样再抛出去——
+# 自己只负责清理现场，问题继续上报（05 章的事务回滚就是这个用法）
+try:
+    do_something()
+except Exception:
+    cleanup()
+    raise           # 原样上抛，不把错误吞掉
 ```
 
 > **要点**：在 FastAPI 中你会经常用 `raise HTTPException(status_code=404, detail="...")`

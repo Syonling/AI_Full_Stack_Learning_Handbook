@@ -22,7 +22,9 @@
 ```python
 from fastapi.staticfiles import StaticFiles
 
-app.mount("/files", StaticFiles(directory="uploads"), name="files")
+from app.core.config import UPLOAD_DIR      # 21 章 7.2 定义的绝对路径常量
+
+app.mount("/files", StaticFiles(directory=UPLOAD_DIR), name="files")
 # uploads/abc123.mp3  →  可通过 http://127.0.0.1:8000/files/abc123.mp3 访问
 ```
 

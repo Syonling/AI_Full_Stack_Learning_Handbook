@@ -34,10 +34,10 @@ S1 坐标系与数据 → S2 静态渲染 → S3 能拖 → S4 能存能读 → 
 
 ```javascript
 // js/timeline.js
-const PX_PER_SECOND = 20;                    // 1 秒 = 20 像素（全文件唯一魔法数字）
+export const PX_PER_SECOND = 20;             // 1 秒 = 20 像素（全文件唯一魔法数字）
 
-const secToPx = (sec) => sec * PX_PER_SECOND;
-const pxToSec = (px) => px / PX_PER_SECOND;
+export const secToPx = (sec) => sec * PX_PER_SECOND;   // export：scheduler.js 也要用
+export const pxToSec = (px) => px / PX_PER_SECOND;
 ```
 
 前端的工作数据结构（和 21 章 clips 表一一对应）：
@@ -264,6 +264,8 @@ loadTimeline();
 
 ```javascript
 // js/scheduler.js
+import { secToPx } from "./timeline.js";     // 18 章的模块化：换算函数全项目只有一份
+
 const playheadEl = document.querySelector("#playhead");
 let playing = false;
 
@@ -310,6 +312,9 @@ export function playTimeline(clips) {
 ```
 
 ```javascript
+// 这段绑定写在 timeline.js 里（clips 数组住在那个模块）：
+import { playTimeline } from "./scheduler.js";
+
 document.querySelector("#play-timeline-btn")
     .addEventListener("click", () => playTimeline(clips));
 ```

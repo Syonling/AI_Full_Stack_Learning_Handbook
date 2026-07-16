@@ -280,6 +280,9 @@ loadTodos();                                 // 打开页面先加载一次
 1. 加"只看未完成"过滤按钮（提示：GET `/todos?done=false`，07 章的查询参数终于被前端用上了）。
 2. 把 `alert` 错误提示改成页面顶部的红色横幅 div，3 秒后自动消失（`setTimeout`）。
 3. 双击标题进入编辑模式，改完回车发 PUT 更新 title（提示：`dblclick` 事件 + 临时替换成 input）。
-4. **终极练习**：现在你拥有了实现 Audio Book 的全部知识——去把 [Backend/main.py](../demo/) 的 `/story` 接口写出来，让你自己的 main.html 真正跑起来。这是整个学习系统给你准备的毕业设计。
+4. **终极练习（AudioBook 前传）**：不看 demo，从零实现 13 章第 6 节那个 Audio Book 迷你应用的完整前后端——
+   后端两个接口：`POST /story`（接收 `{"text": ...}` 存入 SQLite）、`GET /story`（返回全部故事列表）；
+   前端一个页面：textarea + Submit 提交 + Inquiry 查询展示。
+   做完它，你就为 21~25 章的音频项目实践热好了身。
 
 > 下一章：[17 · Vue 3 入门](17-vue-basics.md) —— 体验框架如何把本章 100 行 DOM 代码变成 30 行。

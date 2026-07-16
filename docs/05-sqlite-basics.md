@@ -219,7 +219,7 @@ try:
     conn.commit()               # 两步都成功 → 一起生效
 except Exception:
     conn.rollback()             # 任何一步出错 → 全部撤销，回到修改前
-    raise
+    raise                       # 不带参数 = 把异常原样再抛出（01 章第 5 节讲过）
 finally:
     conn.close()
 ```

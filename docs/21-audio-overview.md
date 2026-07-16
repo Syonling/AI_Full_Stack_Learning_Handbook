@@ -195,9 +195,10 @@ audiobook/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py           # 组装 + StaticFiles 挂载 + CORS
-│   ├── core/config.py    # 08 章的 Settings（上传大小限制等）
+│   ├── core/config.py    # Settings + 路径常量（↓ 7.2 给出完整版）
 │   ├── db/database.py    # ↓ 7.2 给出完整版
 │   ├── schemas/          # audio.py / clip.py
+│   ├── services/         # tts.py（24 章创建）
 │   └── routers/          # audios.py / synthesize.py / timeline.py
 └── frontend/
     ├── index.html        # ↓ 7.3 给出完整骨架
@@ -260,6 +261,30 @@ def init_db() -> None:
 ```
 
 （`status` 列本是 24 章才需要的，建表时一步到位，免得中途 ALTER。）
+
+同样一步到位的还有 **config.py**——把「项目根目录」和「上传目录」定成**绝对路径常量**，
+后面所有章节的文件读写都引用它（贯彻 05/07 章"路径用 `__file__` 定位"的教义，
+避免"从不同目录启动、文件建到别处"的坑）：
+
+```python
+# app/core/config.py
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent    # audiobook/ 根目录
+UPLOAD_DIR = BASE_DIR / "uploads"                           # 音频文件目录（绝对路径）
+
+
+class Settings(BaseSettings):
+    app_name: str = "AudioBook"
+    log_level: str = "INFO"
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env",
+                                      env_file_encoding="utf-8")
+
+
+settings = Settings()
+```
 
 ### 7.3 index.html 页面骨架（四个功能区一次搭好，后面各章往里填）
 

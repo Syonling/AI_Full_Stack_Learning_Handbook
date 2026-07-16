@@ -127,17 +127,16 @@ class CloudAITTS:
 ```python
 # routers/synthesize.py
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from mutagen import File as MutagenFile
 from pydantic import BaseModel, Field
 
+from app.core.config import UPLOAD_DIR               # 绝对路径常量（21 章 7.2）
 from app.db.database import get_db, connect          # connect(): 后台任务自己开连接
 from app.services.tts import synthesizer
 
 router = APIRouter(tags=["synthesize"])
-UPLOAD_DIR = Path("uploads")
 
 class SynthesizeIn(BaseModel):
     text: str = Field(..., min_length=1, max_length=2000)   # 上限保护成本和耗时
