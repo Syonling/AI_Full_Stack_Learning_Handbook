@@ -17,6 +17,37 @@
 
 ---
 
+## 0. 本章的正确打开方式：三遍法
+
+本章下面有完整的参考代码——**但它是"参考答案"，不是"阅读材料"**。
+直接往下读然后复制粘贴，你会"全都看懂了，什么都没学会"。正确用法：
+
+> **第一遍 · 自己搭**：只看下面的「任务规格卡」，**别往下翻**，凭 04/05/06 章的知识自己写。
+> 每一步卡住超过 30 分钟，才允许翻到对应小节看参考。
+>
+> **第二遍 · 对照**：拿你的实现和本章的逐行讲解做 diff——**差异处就是你的知识缺口**，
+> 逐个搞懂"参考代码为什么这么写"。
+>
+> **第三遍 · 重写**：合上书、关掉 demo，从空文件夹再写一遍。写不出的地方，回去补对应章节。
+
+### 任务规格卡（第一遍只看这里）
+
+**目标**：Todo API——本章开头那张接口表的 5 个接口，数据存 SQLite。
+
+**施工顺序**（每一步都可运行、可验证，别跳步）：
+
+| 步骤 | 做什么 | 用到的知识 | 验收标准 |
+|---|---|---|---|
+| ① | `database.py`：建表函数 + get_db 依赖 | 05 章建表/连接、06 章第 6 节 yield 依赖 | `python3 -c "from database import init_db; init_db()"` 后出现 todos.db，`sqlite3` 命令行能看到表 |
+| ② | `schemas.py`：Create / Update / Out 三个模型 | 06 章第 1、2 节 | `python3 -c "from schemas import TodoCreate; print(TodoCreate(title='hi'))"` 不报错 |
+| ③ | `main.py`：先只写 `GET /todos` 一个接口，跑通 | 04 章路由、06 章 Depends | /docs 里能调用，返回 `[]` |
+| ④ | 依次追加 POST → GET 单条 → PUT → DELETE，**每加一个测一个** | 06 章 HTTPException/状态码 | 每个接口在 /docs 验证后再写下一个 |
+| ⑤ | 重启服务再查询 | —— | 数据还在（落盘成功）|
+
+提示：卡在"第一行写什么"时，回看每步"用到的知识"那一章的代码示例——**允许翻旧章节，不允许翻本章下文**。
+
+---
+
 ## 1. 项目结构
 
 ```
@@ -47,6 +78,11 @@ API 设计（RESTful 风格，业界通用约定）：
 ---
 
 ## 2. database.py —— 数据库层
+
+::: warning 🛠 先试后看
+现在暂停。按规格卡第 ① 步自己写：一个 `init_db()`（建 todos 表）+ 一个 `get_db()`（yield 依赖）。
+写完（或卡满 30 分钟）再往下对照。
+:::
 
 ```python
 """SQLite 连接管理与建表。"""
@@ -96,6 +132,11 @@ def get_db():
 
 ## 3. schemas.py —— 数据模型层
 
+::: warning 🛠 先试后看
+规格卡第 ② 步：三个模型——新建用的（无 id、title 必填）、更新用的（全部字段可选）、
+返回用的（含 id）。想想每个字段的类型和默认值，写完再对照。
+:::
+
 ```python
 """Pydantic 模型：定义 API 收发数据的结构。"""
 from pydantic import BaseModel, Field
@@ -132,6 +173,11 @@ class TodoOut(BaseModel):
 ---
 
 ## 4. main.py —— 应用与路由层
+
+::: warning 🛠 先试后看
+规格卡第 ③④ 步：先只写 GET /todos 跑通，再一个一个追加其余四个接口、每加一个在 /docs 测一个。
+两个难点自己先想：PUT 怎么做"没发的字段保留旧值"？DELETE 怎么判断"id 不存在返回 404"？
+:::
 
 ```python
 """FastAPI 应用入口：五个 CRUD 路由。"""
@@ -296,12 +342,14 @@ uvicorn main:app --reload
 
 ---
 
-## 小练习（增强这个 demo）
+## 小练习
 
-1. 给 `GET /todos` 增加 `offset: int = 0` 查询参数，实现分页（`LIMIT ? OFFSET ?`）。
-2. 增加 `GET /todos/search?keyword=xxx` 接口，用 `LIKE` 模糊搜索 title。
-3. 给表增加 `created_at` 字段（提示：`TEXT DEFAULT (datetime('now'))`），
+1. **通关检定（三遍法·第三遍）**：合上书、关掉 demo，从空文件夹**计时**重写整个 API——
+   45 分钟内独立完成且五个接口全部可用，才算通过本章。没过就找出卡住的步骤，回对应章节补，改天再测。
+2. 给 `GET /todos` 增加 `offset: int = 0` 查询参数，实现分页（`LIMIT ? OFFSET ?`）。
+3. 增加 `GET /todos/search?keyword=xxx` 接口，用 `LIKE` 模糊搜索 title。
+4. 给表增加 `created_at` 字段（提示：`TEXT DEFAULT (datetime('now'))`），
    删掉旧的 todos.db 重启后观察效果。
-4. 增加 `DELETE /todos` 接口（清空所有），并思考：这样的接口危险吗？该不该做二次确认？
+5. 增加 `DELETE /todos` 接口（清空所有），并思考：这样的接口危险吗？该不该做二次确认？
 
 > 下一章：[06 · 测试与项目结构](10-testing-and-structure.md) —— 让你的代码可验证、可扩展。
