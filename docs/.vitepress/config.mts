@@ -95,6 +95,11 @@ export default defineConfig({
           { text: '25 · 时间轴编辑器（毕业项目）', link: '/25-audio-timeline' },
         ],
       },
+      {
+        text: '附录',
+        collapsed: false,
+        items: [{ text: '26 · 终端命令速查与实战', link: '/26-terminal-cheatsheet' }],
+      },
     ],
 
     // ── 上一章 / 下一章（按 sidebar 顺序自动生成）──

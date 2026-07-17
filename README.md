@@ -58,6 +58,7 @@
 | 23 | [素材入库：上传与录音](docs/23-audio-upload-recording.md) | FormData 上传、uuid 安全命名、mutagen、MediaRecorder 录音 | 4~5 小时 |
 | 24 | [AI 语音合成](docs/24-ai-voice-synthesis.md) | 适配器模式、edge-tts 替身、AI API 插槽、202+轮询 | 3~4 小时 |
 | 25 | [时间轴编辑器](docs/25-audio-timeline.md) | 像素⇄秒坐标系、Pointer 拖拽、保存加载、串播调度器 🎓 毕业项目 | 6~8 小时 |
+| 26 | [终端命令速查与实战](docs/26-terminal-cheatsheet.md) | 附录：文件/进程/端口/管道组合拳、sqlite3 进阶（备份/导出）、危险命令清单 | 按需查阅 |
 
 > 📐 编号规则说明：文件编号是**永久 ID**（只增不改）。后插入的章节按内容归入对应分组、排在组末保持编号升序，章内标注建议阅读位置。
 

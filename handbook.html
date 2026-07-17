@@ -175,6 +175,7 @@ const CATS = {
   css:     "CSS",
   js:      "JavaScript",
   audio:   "音频开发",
+  term:    "终端命令",
 };
 
 /* 每条 = { cat, title, desc, code, tip?, kw(额外搜索词) } */
@@ -684,6 +685,19 @@ cursor.execute(f"SELECT * FROM todos WHERE title = '{title}'")
 # ✅ 正确
 cursor.execute("SELECT * FROM todos WHERE title = ?", (title,))`,
  tip:"单个参数也必须是元组：(title,) —— 结尾的逗号不能少。"},
+
+{cat:"sqlite", title:"conn.execute() 快捷方式", kw:"cursor 省略 链式 fetchall 直接execute",
+ desc:"Connection 的 execute 自动建 cursor 并返回它——所以能链式调用。与三步写法完全等价。",
+ code:`# 标准三步
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM todos WHERE done = ?", (0,))
+rows = cursor.fetchall()
+
+# 快捷方式（教程 07 章起统一用这种）
+rows = conn.execute("SELECT * FROM todos WHERE done = ?",
+                    (0,)).fetchall()
+new_id = conn.execute("INSERT INTO todos (title) VALUES (?)",
+                      ("x",)).lastrowid`},
 
 {cat:"sqlite", title:"commit 与 rollback（事务）", kw:"transaction 提交 回滚 撤销 事务",
  desc:"修改先记在\"草稿\"里，commit 才写入文件；出错可 rollback 撤销。",
@@ -2380,6 +2394,130 @@ const pxToSec = (px) => px / PX_PER_SECOND;
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
 });`},
+
+/* ── 终端命令 ─────────────────────────────── */
+{cat:"term", title:"四个改变人生的按键", kw:"tab 补全 历史 中断 ctrl 快捷键",
+ desc:"比背任何命令都重要的肌肉记忆。",
+ code:`Tab        自动补全文件名/命令（路径永远别手打全）
+↑ / ↓      翻历史命令
+Ctrl + C   中断当前程序（停 uvicorn / 卡住的命令）
+Ctrl + A/E 光标跳行首 / 行尾`},
+
+{cat:"term", title:"路径与移动", kw:"cd pwd 目录 绝对 相对 家目录",
+ desc:"每个命令都在「某个位置」执行。~ 是家，. 当前，.. 上级。",
+ code:`pwd            # 我现在在哪
+cd demo        # 进入（相对路径）
+cd ..          # 回上级
+cd ~/dev       # 绝对路径（从家出发）
+cd -           # 回到上一个待过的目录（来回切换神器）`},
+
+{cat:"term", title:"文件与目录操作", kw:"ls mkdir touch cp mv rm open 复制 移动 删除",
+ desc:"增删改查全家福。rm 不进废纸篓——先 ls 看清再删。",
+ code:`ls -la               # 列出（含 .env 等隐藏文件）
+mkdir -p a/b/c       # 一路建到底
+cp -r demo backup    # 复制目录要 -r
+mv old.py new.py     # 移动 = 重命名
+rm -r build/         # ⚠️ 无确认无后悔药
+open .               # macOS：访达打开当前目录`},
+
+{cat:"term", title:"看日志：tail -f", kw:"cat head less 实时 跟踪 日志",
+ desc:"排障主战场。tail -f 实时滚动新日志，less 分页读大文件。",
+ code:`tail -50 app.log     # 看最后 50 行（日志看尾部）
+tail -f app.log      # ★ 实时跟踪，新日志一来就显示
+head -20 app.log     # 前 20 行
+less app.log         # 分页读：空格翻页 /词 搜索 q 退出
+
+tail -f app.log | grep -E "WARNING|ERROR"   # 只看告警`},
+
+{cat:"term", title:"grep / find 搜索", kw:"查找 递归 文件名 内容 代码",
+ desc:"grep 搜内容，find 搜文件名。",
+ code:`grep -n "ERROR" app.log        # 搜内容，-n 带行号
+grep -rn "get_db" app/         # 递归搜目录（找代码定义处）
+grep -i "error" app.log        # 忽略大小写
+
+find . -name "*.db"            # 按名字找文件
+wc -l app.log                  # 数行数`},
+
+{cat:"term", title:"端口被占用三步剧本", kw:"lsof kill 8000 address already in use 进程",
+ desc:"Address already in use 的标准解法。",
+ code:`lsof -i :8000        # ① 谁占着？拿到 PID
+kill <PID>           # ② 温柔终止（没反应再 kill -9）
+lsof -i :8000        # ③ 确认已空
+
+pkill -f "uvicorn"   # 按命令名模糊匹配终止`},
+
+{cat:"term", title:"后台运行与进程查看", kw:"ps aux jobs fg & background",
+ desc:"结尾 & = 后台跑；ps 查进程；日志重定向进文件。",
+ code:`uvicorn main:app > server.log 2>&1 &   # 后台跑+日志进文件
+ps aux | grep -v grep | grep uvicorn   # 查进程（排除 grep 自己）
+jobs                 # 本终端的后台任务
+fg                   # 调回前台（然后可 Ctrl+C）`},
+
+{cat:"term", title:"管道 | 与重定向", kw:"pipe 组合 输出 追加 覆盖 2>&1",
+ desc:"| 把左边的输出喂给右边当输入；> 覆盖写（危险），>> 追加写。",
+ code:`命令A | 命令B          # 像乐高一样拼
+命令 > 文件            # 覆盖 ⚠️ 原内容清空
+命令 >> 文件           # 追加
+命令 > log 2>&1        # 错误输出也一起收
+
+curl -s :8000/todos | python3 -m json.tool   # 格式化 JSON
+grep "ERROR" app.log | wc -l                 # 数错误条数
+history | grep docker                        # 找历史命令`},
+
+{cat:"term", title:"sqlite3 交互模式格式化", kw:"mode box headers 表格 好看 输出",
+ desc:"默认输出没法看，两条点命令变表格。点命令不加分号，SQL 要加分号。",
+ code:`sqlite3 todos.db     # 进入（.quit 退出）
+
+.headers on          -- 显示列名
+.mode box            -- 表格化输出
+SELECT * FROM todos LIMIT 5;
+
+.tables              -- 有哪些表
+.schema todos        -- 建表语句
+PRAGMA table_info(todos);   -- 表结构视图`},
+
+{cat:"term", title:"sqlite3 一句话模式", kw:"脚本 参数 直接执行 命令行查询",
+ desc:"SQL 作为参数直接执行——可进脚本、可接管道。",
+ code:`sqlite3 todos.db "SELECT COUNT(*) FROM todos;"
+sqlite3 -box -header todos.db "SELECT * FROM todos WHERE done=0;"
+
+# 组合拳：每天记录数据量
+echo "$(date +%F): $(sqlite3 todos.db 'SELECT COUNT(*) FROM todos;')" >> stats.log`},
+
+{cat:"term", title:"sqlite3 备份与导出", kw:"backup dump csv 恢复 导出",
+ desc:"上线检查清单里「备份策略」的落地。.backup 在线备份最安全。",
+ code:`sqlite3 todos.db ".backup backup_$(date +%F).db"   # 在线备份
+sqlite3 todos.db .dump > backup.sql                # 导出 SQL 文本
+sqlite3 new.db < backup.sql                        # 从 SQL 恢复
+
+sqlite3 -csv -header todos.db "SELECT * FROM todos;" > todos.csv`},
+
+{cat:"term", title:"which / 环境排查", kw:"path venv 哪个python 环境变量 env",
+ desc:"「用的到底是哪个 python」的排查法：which 路径含 .venv = 虚拟环境已激活。",
+ code:`which python3        # 可执行文件在哪
+which uvicorn        # 路径含 .venv → venv 已激活 ✓
+
+echo $PATH           # 查看 PATH
+env | grep API       # 列出匹配的环境变量
+ipconfig getifaddr en0   # macOS 查局域网 IP（手机联调）`},
+
+{cat:"term", title:"alias 与命令串联", kw:"别名 zshrc && 分号 !!",
+ desc:"高频长命令绑成短名字（写进 ~/.zshrc 永久生效）。",
+ code:`alias va="source .venv/bin/activate"
+alias gs="git status"
+# 改完执行 source ~/.zshrc 生效
+
+cd demo && va        # && = 前一条成功才执行后一条
+sudo !!              # !! = 重放上一条命令`},
+
+{cat:"term", title:"危险命令清单", kw:"rm -rf sudo 覆盖 安全 危险",
+ desc:"背下来。本书全程不需要 sudo。",
+ code:`rm -rf 路径    无确认直接消失 → 删前先 ls 同路径看清
+>  重定向      目标文件瞬间清空 → 追加一律用 >>
+sudo 命令      错误被放大 → 教程叫你 sudo pip 的别照做
+kill -9        不给程序清理机会 → 先普通 kill
+mv a b         b 存在直接覆盖 → 移动前 ls 确认
+来路不明的命令  看不懂就别贴 → 先问 AI 这条命令做什么`},
 ];
 
 /* ── 渲染 ─────────────────────────────── */

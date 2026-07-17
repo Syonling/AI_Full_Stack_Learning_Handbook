@@ -77,6 +77,7 @@ features:
 | 23 | [素材入库：上传与录音](/23-audio-upload-recording) | FormData 上传、uuid 安全命名、mutagen、MediaRecorder 录音 | 4~5 小时 |
 | 24 | [AI 语音合成](/24-ai-voice-synthesis) | 适配器模式、edge-tts 免费替身、AI API 插槽、202+轮询 | 3~4 小时 |
 | 25 | [时间轴编辑器](/25-audio-timeline) | 像素⇄秒坐标系、Pointer 拖拽、保存加载、串播调度器 🎓 毕业项目 | 6~8 小时 |
+| 26 | [终端命令速查与实战](/26-terminal-cheatsheet) | 附录：文件/进程/端口/管道组合拳、sqlite3 进阶（备份/导出）、危险命令清单 | 按需查阅 |
 
 > 🎨 **前端章节（13~17）无需按总编号顺序等待**——HTML/CSS 没有任何前置依赖，可与后端章节并行学习；
 > 16 章需要后端 demo 能跑起来（07 章），17 章需要先完成 16 章。

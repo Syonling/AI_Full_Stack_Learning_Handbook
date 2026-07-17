@@ -272,6 +272,26 @@ sqlite3 app.db
 # .quit            退出
 ```
 
+### 8.4 conn.execute()：跳过 cursor 的快捷方式（07 章起会大量使用）
+
+到目前为止我们都是标准三步：`connect → cursor() → execute`。
+其实 **Connection 对象自带 execute 快捷方式**——内部自动新建一个 cursor、执行 SQL、
+再把这个 cursor **返回给你**：
+
+```python
+# 标准三步（本章之前的写法）
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM todos WHERE done = ?", (0,))
+rows = cursor.fetchall()
+
+# 快捷方式：三行并一行 —— execute 返回的就是 cursor，所以能直接链式调用
+rows = conn.execute("SELECT * FROM todos WHERE done = ?", (0,)).fetchall()
+new_id = conn.execute("INSERT INTO todos (title) VALUES (?)", ("x",)).lastrowid
+```
+
+两种写法**完全等价**。单条语句用快捷方式更省行——**从 07 章起，教程代码统一用这种写法**，
+在那里见到 `db.execute(...).fetchone()` 不要慌，它就是"自动帮你建了 cursor"。
+
 ---
 
 ## 常见错误与排查
