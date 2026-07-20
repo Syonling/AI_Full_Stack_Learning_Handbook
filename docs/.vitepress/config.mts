@@ -62,8 +62,9 @@ export default defineConfig({
           { text: '09 · FastAPI 工程化', link: '/09-fastapi-engineering' },
           { text: '10 · 测试与项目结构', link: '/10-testing-and-structure' },
           { text: '11 · 部署入门', link: '/11-deployment' },
-          // 后插入的章节放组末，保持组内编号升序（20 章内文标注了建议阅读位置）
+          // 后插入的章节放组末，保持组内编号升序（章内文标注了建议阅读位置）
           { text: '20 · 后端代码组织', link: '/20-backend-engineering' },
+          { text: '27 · 用户登录与身份认证', link: '/27-user-authentication' },
         ],
       },
       {

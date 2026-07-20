@@ -72,6 +72,7 @@ features:
 | 18 | [前端工程组织](/18-frontend-engineering) | 文件夹分层、CSS 设计令牌、BEM 命名、JS 模块化（含 Vue 项目对照） | 3~4 小时 |
 | 19 | [设计美学：Apple 风格](/19-apple-design) | HIG 三原则、8pt 留白、字阶、毛玻璃、Apple 风换肤实战 | 3~4 小时 |
 | 20 | [后端代码组织](/20-backend-engineering) | 分层思想、包结构、循环导入、service 层拆分时机（属「工程化落地」组，学完 10 章即可读） | 3~4 小时 |
+| 27 | [用户登录与身份认证](/27-user-authentication) | 密码哈希、JWT、注册/登录接口、保护路由、前端令牌配合（属「工程化落地」组，排在 20 章之后）| 4~5 小时 |
 | 21 | [音频应用总览与选型](/21-audio-overview) | 音频零基础速成、架构设计、外键与 JOIN、选型总表 🎧 | 2~3 小时 |
 | 22 | [音频播放与播放器](/22-audio-playback) | audio 标签、Range 请求、自动播放策略、自定义播放器、波形 | 3~4 小时 |
 | 23 | [素材入库：上传与录音](/23-audio-upload-recording) | FormData 上传、uuid 安全命名、mutagen、MediaRecorder 录音 | 4~5 小时 |
